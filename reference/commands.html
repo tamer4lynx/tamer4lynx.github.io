@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLI Commands Reference - Tamer4Lynx</title>
+<script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const isDark = !saved || saved === 'auto' ? preferDark : saved === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
+<link href="/static/css/styles.3a1438b292.css" rel="stylesheet">
+<script defer src="/static/js/styles.ecf15d6bdc.js"></script>
+<script defer src="/static/js/lib-react.83fdefa1e5.js"></script>
+<script defer src="/static/js/lib-router.94dc0bf0cd.js"></script>
+<script defer src="/static/js/942.dfc87c6a49.js"></script>
+<script defer src="/static/js/index.0ca00681a2.js"></script>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Rspress v2.0.5">
+<link rel="icon" href="/tamer-logo.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="CLI Commands Reference - Tamer4Lynx">
+<meta name="description" content="Commands use the form t4l <command> [target] [flags]. Target is a platform (ios, android) or, for create, an extension type (module, element, service, combo). All flags support both short and long form (e.g. -d or --debug).">
+<meta property="og:description" content="Commands use the form t4l <command> [target] [flags]. Target is a platform (ios, android) or, for create, an extension type (module, element, service, combo). All flags support both short and long form (e.g. -d or --debug)."></head>
+
+  <body>
+    <div id="__rspress_root"><link rel="preload" as="image" href="/tamer-logo.png"/><header class="rp-nav"><div class="rp-nav__left"><div class="rp-nav__title"><a href="/" class="rp-nav__title__link rp-link"><div class="rp-nav__title__logo"><img src="/tamer-logo.png" alt="logo" id="logo" class="rspress-logo rp-nav__title__logo-image rp-nav__title__logo-image--light"/><img src="/tamer-logo.png" alt="logo" id="logo" class="rspress-logo rp-nav__title__logo-image rp-nav__title__logo-image--dark"/></div></a></div></div><div class="rp-nav__right"><button class="rp-search-button"><div class="rp-search-button__content"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 20 21" class="rp-search-button__icon"><path fill="currentColor" d="M8.333 1.913A6.667 6.667 0 0 1 15 8.58c0 1.54-.525 2.957-1.402 4.085l4.49 4.492a.834.834 0 0 1-1.177 1.178l-4.491-4.49a6.64 6.64 0 0 1-4.087 1.402 6.667 6.667 0 0 1 0-13.334m0 1.667a5 5 0 1 0 0 10 5 5 0 0 0 0-10"></path></svg><span class="rp-search-button__word">Search</span></div><div class="rp-search-button__hotkey" style="opacity:0"><span></span><span>K</span></div></button><div class="rp-search-button--mobile"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 20 21"><path fill="currentColor" d="M8.333 1.913A6.667 6.667 0 0 1 15 8.58c0 1.54-.525 2.957-1.402 4.085l4.49 4.492a.834.834 0 0 1-1.177 1.178l-4.491-4.49a6.64 6.64 0 0 1-4.087 1.402 6.667 6.667 0 0 1 0-13.334m0 1.667a5 5 0 1 0 0 10 5 5 0 0 0 0-10"></path></svg></div><ul class="rp-nav-menu rp-nav-menu--right"><li class="rp-nav-menu__item"><a href="/guide/index.html" class="rp-nav-menu__item__container rp-link">Guide</a></li><li class="rp-nav-menu__item rp-nav-menu__item--active"><a href="/reference/commands.html" class="rp-nav-menu__item__container rp-link">Commands</a></li><li class="rp-nav-menu__item"><a href="/packages/index.html" class="rp-nav-menu__item__container rp-link">Packages</a></li></ul><div class="rp-nav__others"><div class="rp-nav-menu__divider"></div><div class="rp-switch-appearance"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24" class="rp-switch-appearance__icon rp-switch-appearance__icon--sun"><path fill="currentColor" d="m7.001 15.848-1.226 1.226a.58.58 0 0 0 0 .818.58.58 0 0 0 .818 0l1.226-1.226a.58.58 0 0 0 0-.818.58.58 0 0 0-.818 0m-.352-8.735a.584.584 0 0 0 .825-.825L6.237 5.051a.584.584 0 0 0-.825.825zM5.011 11.07h-1.75a.584.584 0 0 0 0 1.167h1.75c.324 0 .584-.26.584-.583a.585.585 0 0 0-.584-.584m7.003-5.835c.324 0 .584-.26.584-.584V2.9a.58.58 0 0 0-.584-.584.58.58 0 0 0-.583.583V4.65c0 .323.262.584.583.584m5.616 1.621 1.226-1.225a.58.58 0 0 0 0-.818.58.58 0 0 0-.818 0l-1.226 1.225a.58.58 0 0 0 0 .818.576.576 0 0 0 .818 0m3.138 4.214h-1.75a.58.58 0 0 0-.584.584c0 .324.26.584.583.584h1.751a.584.584 0 1 0 0-1.167m-3.389 5.124a.584.584 0 0 0-.825.825l1.238 1.238a.584.584 0 0 0 .825-.826zm-5.365-9.795a5.256 5.256 0 0 0-5.257 5.258 5.256 5.256 0 0 0 5.257 5.257 5.256 5.256 0 0 0 5.257-5.257 5.256 5.256 0 0 0-5.257-5.258m0 11.675a.58.58 0 0 0-.583.583v1.751a.582.582 0 1 0 1.167 0v-1.75a.584.584 0 0 0-.584-.584"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" viewBox="0 0 19 19" class="rp-switch-appearance__icon rp-switch-appearance__icon--moon"><path fill="currentColor" d="M9.166 0a9.2 9.2 0 0 1 1.857.188.834.834 0 0 1 .042 1.623 4.47 4.47 0 1 0 5.457 5.457l.048-.135a.834.834 0 0 1 1.575.177q.186.902.188 1.856A9.168 9.168 0 1 1 9.166 0"></path></svg></div><div class="rp-social-links"><a href="https://github.com/tamer4lynx/tamer4lynx" target="_blank" rel="noopener noreferrer" class="rp-social-links__item"><div class="rp-social-links__icon"><div class="rp-social-links__icon"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"></ul></div></div><button aria-label="mobile hamburger" class="rp-nav-hamburger rp-nav-hamburger__sm"><svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.667" d="M3.645 5.225h13.333M3.645 10.225h13.333M3.645 15.225h13.333"></path></svg></button><button aria-label="mobile hamburger" class="rp-nav-hamburger rp-nav-hamburger__md"><svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.667" d="M3.645 5.225h13.333M3.645 10.225h13.333M3.645 15.225h13.333"></path></svg><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"><div class="rp-nav-menu__others-mobile__container"><div class="rp-nav-hamburger__md__hover-group"><div class="rp-nav-screen-appearance"><div class="rp-nav-screen-appearance__left">Theme</div><div class="rp-nav-screen-appearance__right"></div></div><div class="rp-nav-screen-divider"></div><div class="rp-social-links"><a href="https://github.com/tamer4lynx/tamer4lynx" target="_blank" rel="noopener noreferrer" class="rp-social-links__item"><div class="rp-social-links__icon"><div class="rp-social-links__icon"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"></ul></div></div></div></ul></button></div></header><div class="rp-doc-layout__menu"><div class="rp-sidebar-menu"><button type="button" class="rp-sidebar-menu__left"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"></path></svg><span>Menu</span></button><button type="button" class="rp-sidebar-menu__right"><span class="rp-sidebar-menu__right__text">ON THIS PAGE</span><svg width="14" height="14" class="rp-progress-circle"><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-divider-light)" stroke-width="2"></circle><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-brand)" stroke-width="2" stroke-dasharray="37.69911184307752" stroke-dashoffset="37.69911184307752" transform="rotate(-90 7 7)" style="transition:stroke-dashoffset 0.3s"></circle></svg><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-sidebar-menu__right__icon" style="transform:rotate(0deg);transition:transform 0.2s ease-out"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></button></div></div><div class="rp-doc-layout__container"><aside class="rp-doc-layout__sidebar rp-scrollbar"><div class="rp-sidebar-item rp-sidebar-group" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span>Guide</span></div><div class="rp-sidebar-item__right"><div style="cursor:pointer;transition:transform 0.2s ease-out;transform:rotate(90deg)"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></div></div></div><div style="display:grid;grid-template-rows:1fr;transition:grid-template-rows 0.2s ease-out"><div style="overflow:hidden"><a href="/guide/getting-started.html" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>Getting Started</span></div><div class="rp-sidebar-item__right"></div></a><a href="/guide/configuration.html" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>Configuration</span></div><div class="rp-sidebar-item__right"></div></a><a href="/guide/example-anatomy.html" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>Example Anatomy</span></div><div class="rp-sidebar-item__right"></div></a></div></div><a href="/reference/commands.html" class="rp-sidebar-item rp-sidebar-item--active rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span>Commands</span></div><div class="rp-sidebar-item__right"></div></a><a href="/packages/index.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span>Packages</span></div><div class="rp-sidebar-item__right"></div></a><div class="rp-sidebar-item rp-sidebar-group" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span>Lynx ecosystem</span></div><div class="rp-sidebar-item__right"><div style="cursor:pointer;transition:transform 0.2s ease-out;transform:rotate(90deg)"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></div></div></div><div style="display:grid;grid-template-rows:1fr;transition:grid-template-rows 0.2s ease-out"><div style="overflow:hidden"><a href="https://lynxjs.org/" target="_blank" rel="noopener noreferrer" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>Lynx</span></div><div class="rp-sidebar-item__right"></div></a><a href="https://lynxjs.org/rspeedy/" target="_blank" rel="noopener noreferrer" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>Rspeedy</span></div><div class="rp-sidebar-item__right"></div></a><a href="https://lynxjs.org/react/" target="_blank" rel="noopener noreferrer" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span>ReactLynx</span></div><div class="rp-sidebar-item__right"></div></a></div></div></aside><div class="rp-doc-layout__doc"><main class="rp-doc-layout__doc-container"><div class="rp-doc rspress-doc"><!--$--><h1 class="rp-toc-include" id="cli-commands-reference"><a href="#cli-commands-reference" class="rp-header-anchor rp-link" aria-hidden="true">#</a>CLI Commands Reference<!-- --> </h1>
+<p>Commands use the form <strong><code>t4l &lt;command&gt; [target] [flags]</code></strong>. Target is a platform (<code>ios</code>, <code>android</code>) or, for create, an extension type (<code>module</code>, <code>element</code>, <code>service</code>, <code>combo</code>). All flags support both short and long form (e.g. <code>-d</code> or <code>--debug</code>).</p>
+<hr/>
+<h2 class="rp-toc-include" id="global"><a href="#global" class="rp-header-anchor rp-link" aria-hidden="true">#</a>Global</h2>
+<p>Environment: On startup, <code>t4l</code> loads <strong><code>.env</code></strong> then <strong><code>.env.local</code></strong> from the directory containing <code>tamer.config.json</code> (walking up from the current working directory). Values are applied only when the variable is <strong>not</strong> already set in the process environment (so CI or shell exports win). Use this for Android signing variables such as <code>ANDROID_KEYSTORE_PASSWORD</code> / <code>ANDROID_KEY_PASSWORD</code> referenced in <code>tamer.config.json</code>, and for <strong>App Store Connect API</strong> variables used with <code>t4l build ios -p --ipa</code>: <strong><code>APP_STORE_CONNECT_API_KEY_PATH</code></strong> (path to the <code>.p8</code> key file), <strong><code>APP_STORE_CONNECT_API_KEY_ID</code></strong>, and <strong><code>APP_STORE_CONNECT_ISSUER_ID</code></strong>. Optional overrides for those env var <em>names</em> live under <code>ios.appStoreConnect</code> in <code>tamer.config.json</code>. If all three are set, the CLI runs <code>xcodebuild archive</code> / <code>-exportArchive</code> with <strong>app-store</strong> export (distribution signing + API key auth) instead of zipping a locally signed <code>.app</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>t4l</code> or <code>t4l init</code></td><td>Interactive setup: creates <code>tamer.config.json</code> in the current directory</td></tr><tr><td><code>t4l add …</code></td><td>Add <code>@tamer4lynx/*</code> to the Lynx project — details below</td></tr><tr><td><code>t4l add-core</code></td><td>Install the core stack in one command — details below</td></tr><tr><td><code>t4l add-dev</code></td><td>Install dev-app, dev-client, and their dependencies — details below</td></tr><tr><td><code>t4l signing [platform]</code></td><td>Configure Android/iOS signing (interactive; Android can generate a keystore with <code>keytool</code>)</td></tr><tr><td><code>t4l --help</code></td><td>Show help</td></tr><tr><td><code>t4l --version</code></td><td>Show version</td></tr></tbody></table></div>
+<h3 class="rp-toc-include" id="developing-the-cli-this-repository"><a href="#developing-the-cli-this-repository" class="rp-header-anchor rp-link" aria-hidden="true">#</a>Developing the CLI (this repository)</h3>
+<p>Do not run <code>node index.ts</code> — Node ESM does not resolve extensionless <code>./src/...</code> imports. From the repo root: <code>npm run cli -- &lt;args&gt;</code> (runs <code>tsx index.ts</code>), or <code>npm run build &amp;&amp; node dist/index.js &lt;args&gt;</code>.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-init"><a href="#t4l-init" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l init</code></h2>
+<p>Initialize <code>tamer.config.json</code> with an <strong>Ink</strong> interactive wizard: step-by-step prompts with validation (Android package / iOS bundle ID), optional <code>$ENV</code> resolution for the Android SDK path, and a confirmation when reusing Android values for iOS. Writes <code>tamer.config.json</code> (including <strong><code>syncTamerComponentTypes</code>: true</strong> by default). For <strong>TypeScript</strong>, when a <code>tsconfig.json</code> exists (project root or under <code>lynxProject</code>), it may <strong>flatten project references</strong> (TS6310), then generate <strong><code>.tamer/tamer-components.d.ts</code></strong> (triple-slash references to installed <code>@tamer4lynx/*</code> ambient type exports) and <strong>ensure <code>include</code></strong> for that file. Broad globs such as <code>node_modules/@tamer4lynx/tamer-*/src/**/*.d.ts</code> are removed when present.</p>
+<p>No flags.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-signing-platform"><a href="#t4l-signing-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l signing [platform]</code></h2>
+<p>Configure Android and iOS release signing in <code>tamer.config.json</code> (Ink interactive wizard).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Argument</th><th>Description</th></tr></thead><tbody><tr><td><em>(none)</em></td><td>Choose Android, iOS, or both</td></tr><tr><td><code>android</code></td><td>Android only</td></tr><tr><td><code>ios</code></td><td>iOS only</td></tr></tbody></table></div>
+<p><strong>Android:</strong> Choose <strong>Generate a new release keystore</strong> (requires a JDK: <code>keytool</code> on <code>PATH</code> or <code>JAVA_HOME</code>) or <strong>Use an existing keystore</strong>. Generation runs <code>keytool -genkeypair</code> (RSA 2048, 10000-day validity) and writes the keystore under a path you choose (default <code>android/release.keystore</code>). Passwords are referenced by env var names in <code>tamer.config.json</code>; on <strong>generate</strong>, the wizard <strong>appends</strong> <code>ANDROID_KEYSTORE_PASSWORD</code> / <code>ANDROID_KEY_PASSWORD</code> (or names you choose) to <strong><code>.env.local</code></strong> if it exists, else <strong><code>.env</code></strong> if that file exists, else it creates <strong><code>.env.local</code></strong>—each new line only; existing keys are not overwritten. The CLI loads <strong><code>.env</code></strong> then <strong><code>.env.local</code></strong> at startup (see Global). Gradle can still use an optional <code>android/signing.properties</code> if you maintain it yourself; the wizard does not write it.</p>
+<p><strong>iOS:</strong> Prompts for Development Team ID and optional code-sign identity / provisioning profile specifier.</p>
+<p>After setup, use <code>t4l build android -p</code> / <code>t4l build ios -p</code> for production signed builds.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-create-target"><a href="#t4l-create-target" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l create &lt;target&gt;</code></h2>
+<p>Create a project or extension. <strong>Target:</strong> <code>ios</code> | <code>android</code> | <code>module</code> | <code>element</code> | <code>service</code> | <code>combo</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Target</th><th>Description</th></tr></thead><tbody><tr><td><code>ios</code></td><td>Create iOS project</td></tr><tr><td><code>android</code></td><td>Create Android project (host by default; use <code>-r</code> for dev-app)</td></tr><tr><td><code>module</code></td><td>Create Lynx extension with native module only</td></tr><tr><td><code>element</code></td><td>Create Lynx extension with custom element (JSX preserved)</td></tr><tr><td><code>service</code></td><td>Create Lynx extension with service only</td></tr><tr><td><code>combo</code></td><td>Create Lynx extension with module + element + service</td></tr></tbody></table></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Description</th></tr></thead><tbody><tr><td><code>--debug</code></td><td><code>-d</code></td><td>For android: create host project (default)</td></tr><tr><td><code>--release</code></td><td><code>-r</code></td><td>For android: create dev-app project</td></tr></tbody></table></div>
+<p>Cannot use <code>--debug</code> and <code>--release</code> together.</p>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> ios</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-comment)">              # host project</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> -r</span><span style="color:var(--shiki-token-comment)">           # dev-app project</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> --release</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> module</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> element</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> create</span><span style="color:var(--shiki-token-string)"> combo</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-build-platform"><a href="#t4l-build-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l build &lt;platform&gt;</code></h2>
+<p>Build your app. <strong>Platform is required:</strong> <code>ios</code> | <code>android</code> (one platform per command). With <strong>debug</strong> (<code>-d</code>), the dev client (QR scan, HMR) is embedded when <code>@tamer4lynx/tamer-dev-client</code> is installed; with <strong>release</strong> (<code>-r</code>), the build has no dev client (unsigned); with <strong>production</strong> (<code>-p</code>), the build is signed for app store.</p>
+<p><strong>Production (<code>-p</code>):</strong> Configure signing first (<code>t4l signing</code>, or <code>t4l signing android</code> / <code>t4l signing ios</code>). If signing is not set up for that platform, the CLI exits with instructions. To build both platforms, run <code>t4l build android -p</code> and <code>t4l build ios -p</code> separately.</p>
+<p><strong>iOS <code>-r</code> / <code>-p</code> vs dev-client:</strong> Release/production builds <strong>do not</strong> build or copy <code>dev-client.lynx.bundle</code> and use the plain host <code>ViewController</code> (main bundle only). You may still see <code>@tamer4lynx/tamer-dev-client</code> in the autolinker’s package list because it provides native iOS pods; that is not the same as embedding the dev-client Lynx shell.</p>
+<p><strong>Lynx DevTool:</strong> Debug (<code>-d</code>) hosts with <code>tamer-dev-client</code> register native DevTool hooks so you can attach the <a href="https://lynxjs.org/guide/devtool.md" target="_blank" rel="noopener noreferrer" class="rp-link">desktop Lynx DevTool</a> over USB. <strong><code>-r</code> / <code>-p</code> builds do not enable DevTool</strong> (iOS: <code>#if DEBUG</code> only; Android: debug classpath / no-op in release).</p>
+<p><strong>iOS <code>-p</code> and <code>-i</code>:</strong> Production (<code>-p</code>) always builds for <strong>real devices</strong> (<code>iphoneos</code>) with code signing enabled (configure via <code>t4l signing ios</code>). Signing settings from <code>tamer.config.json</code> are passed to <code>xcodebuild</code>. With <code>-i</code>, the CLI installs using <code>xcrun devicectl device install app --device &lt;UDID&gt;</code> (Xcode 15+). If <strong>multiple</strong> physical devices are connected, an interactive <strong>device picker</strong> runs; with <strong>one</strong> device, install proceeds without a prompt. Debug (<code>-d</code>) with <code>-i</code> still targets the <strong>simulator</strong> (<code>simctl install</code>).</p>
+<p><strong>Android <code>-i</code>:</strong> Install uses Gradle <code>install*</code> with <code>ANDROID_SERIAL</code> set when you pick a device, or a single connected device. If <strong>multiple</strong> <code>adb</code> devices are connected, an interactive <strong>device picker</strong> runs; with <strong>one</strong> device, install proceeds without a prompt. Launch uses <code>adb -s &lt;serial&gt; shell am start …</code>.</p>
+<p><strong>iOS <code>--ipa</code>:</strong> With <code>t4l build ios -p</code> (and optionally <code>-i</code>), <strong><code>--ipa</code></strong> produces an IPA under <code>ios/build/ipa-export/</code>. <strong>Without</strong> App Store Connect env vars (see Global): unsigned build, manual <code>codesign</code>, then zip into <code>Payload</code> (manual path). <strong>With</strong> <code>APP_STORE_CONNECT_API_KEY_PATH</code>, <code>APP_STORE_CONNECT_API_KEY_ID</code>, and <code>APP_STORE_CONNECT_ISSUER_ID</code> set (and <code>ios.signing.developmentTeam</code>), the CLI uses <strong><code>xcodebuild archive</code></strong> + <strong><code>-exportArchive</code></strong> with method <strong>app-store</strong> and your <code>.p8</code> API key. Use <code>-p</code>; <code>--ipa</code> alone is invalid.</p>
+<p><strong>Non-interactive CI:</strong> If multiple devices are connected and stdin is not a TTY, install fails with a message to connect a single device.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>--embeddable</code></td><td><code>-e</code></td><td>—</td><td>Output to <code>embeddable/</code> for adding LynxView to an existing app. <strong>Requires</strong> <code>t4l build android --embeddable</code> (Android only). Runs a <strong>release-style</strong> embeddable build internally; you do <strong>not</strong> need to pass <code>--release</code>. When <code>-e</code> is present, the CLI only performs the embeddable step.</td></tr><tr><td><code>--debug</code></td><td><code>-d</code></td><td>default</td><td>Debug build with dev client embedded (if tamer-dev-client is installed).</td></tr><tr><td><code>--release</code></td><td><code>-r</code></td><td>—</td><td>Release build without dev client (unsigned).</td></tr><tr><td><code>--production</code></td><td><code>-p</code></td><td>—</td><td>Production build for app store (signed).</td></tr><tr><td><code>--install</code></td><td><code>-i</code></td><td>—</td><td><strong>Android:</strong> install APK to device. <strong>iOS:</strong> with <strong>debug</strong> (<code>-d</code>), install to the <strong>booted simulator</strong>; with <strong>production</strong> (<code>-p</code>), install to a <strong>physical device only</strong> via <code>devicectl</code> (simulator is never used with <code>-p</code>).</td></tr><tr><td><code>--ipa</code></td><td>—</td><td>—</td><td><strong>iOS only</strong> (<code>t4l build ios -p</code>): archive and export a signed IPA after the production build.</td></tr><tr><td><code>--clean</code></td><td><code>-C</code></td><td>—</td><td><strong>Android only:</strong> run Gradle <code>clean</code> before building (helps with stubborn caches). No effect on iOS-only builds.</td></tr></tbody></table></div>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> android</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> -i</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> ios</span><span style="color:var(--shiki-token-string)"> -r</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> --release</span><span style="color:var(--shiki-token-string)"> --install</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> -C</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> ios</span><span style="color:var(--shiki-token-string)"> -p</span><span style="color:var(--shiki-token-string)"> -i</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> ios</span><span style="color:var(--shiki-token-string)"> -p</span><span style="color:var(--shiki-token-string)"> --ipa</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> build</span><span style="color:var(--shiki-token-string)"> android</span><span style="color:var(--shiki-token-string)"> --embeddable</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-link-platform"><a href="#t4l-link-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l link [platform]</code></h2>
+<p>Link native modules to the project and sync native dependencies. <strong>Platform:</strong> <code>ios</code> | <code>android</code> | <code>both</code> (optional; default <code>both</code>).</p>
+<ul>
+<li><strong>iOS:</strong> Updates Podfile and <code>LynxInitProcessor.swift</code> (imports, module registrations, <code>DevClientModule.attachSupportedModuleClassNames</code>), then runs <strong><code>pod install</code></strong> in the <code>ios</code> directory. If <code>@tamer4lynx/tamer-dev-client</code> is installed, also writes <strong><code>tamer-host-native-modules.json</code></strong> into <code>ios/&lt;AppName&gt;/</code> (lists JVM-style <code>moduleClassName</code> values matching dev server <code>meta.json</code>) and registers it in the Xcode project’s <strong>Copy Bundle Resources</strong>.</li>
+<li><strong>Android:</strong> Updates settings.gradle.kts, app/build.gradle.kts, and generated code, then runs <strong>Gradle sync</strong> (<code>./gradlew projects</code>) in the <code>android</code> directory.</li>
+<li><strong>TypeScript / IDE:</strong> When <strong><code>syncTamerComponentTypes</code></strong> is not <code>false</code> in <code>tamer.config.json</code>, each platform’s autolink step also regenerates <strong><code>.tamer/tamer-components.d.ts</code></strong> and ensures <strong><code>tsconfig.json</code></strong> includes it (see <a href="/packages/tooling/tamer-ambient-types.html" class="rp-link">Ambient types</a>).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Description</th></tr></thead><tbody><tr><td><code>--silent</code></td><td><code>-s</code></td><td>Run without output. Useful for CI or postinstall scripts.</td></tr></tbody></table></div>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> link</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> link</span><span style="color:var(--shiki-token-string)"> android</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> link</span><span style="color:var(--shiki-token-string)"> --silent</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<p><strong>Host apps (<code>tamer-dev-app</code>, projects created with <code>t4l ios create</code>):</strong> <code>LynxInitProcessor.swift</code> from <strong>tamer-dev-client</strong> templates only contains <code>GENERATED IMPORTS</code> / <code>GENERATED AUTOLINK</code> placeholders. Run <code>t4l link</code> from the app root (where <code>tamer.config.json</code> lives) so those sections are filled from your <code>node_modules</code> <code>@tamer4lynx/*</code> packages. In the monorepo, <code>packages/tamer-dev-app</code> provides <code>npm run link:native</code> after building the CLI (<code>npm run build</code> at repo root).</p>
+<p><strong>User-provided native modules:</strong> To ensure your custom native extensions are discovered and linked:</p>
+<ol>
+<li>Install the package in your workspace root <code>package.json</code> (or ensure it&#x27;s hoisted to the root <code>node_modules</code> in monorepos).</li>
+<li>The package must include <code>lynx.ext.json</code> or <code>tamer.json</code> with <code>ios</code> and/or <code>android</code> configuration.</li>
+<li>Run <code>t4l link</code> after adding dependencies to update Podfile/Gradle and native registration code.</li>
+<li>For iOS, run <code>pod install</code> in the <code>ios/</code> directory after podspec changes.</li>
+</ol>
+<p><strong>iOS <code>No podspec found</code> for a Tamer package:</strong> Often the app depended on <strong><code>npm install …@latest</code></strong>, where <strong><code>latest</code></strong> points at an older tarball without <code>ios/</code>. Prefer <strong><code>t4l add tamer-insets</code></strong> (or the relevant package): it resolves the <strong>highest published semver</strong> from the registry, unlike <code>latest</code> when that tag lags. Then run <strong><code>t4l link ios</code></strong> again.</p>
+<p><strong>Xcode reports unknown UUID in <code>project.pbxproj</code>:</strong> This can occur after merge conflicts or if the project file was manually edited. Fix by reverting <code>ios/&lt;AppName&gt;.xcodeproj/project.pbxproj</code> from git and re-running <code>t4l bundle ios</code> or <code>t4l link ios</code> to regenerate resource references.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-bundle-platform"><a href="#t4l-bundle-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l bundle [platform]</code></h2>
+<p>Build the Lynx bundle and copy it to the native project. <strong>Platform:</strong> <code>ios</code> | <code>android</code> (optional; omit for both). Runs <strong>autolink</strong> before bundling (iOS: includes <code>tamer-host-native-modules.json</code> when dev-client is present — see <code>t4l link</code>).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>--debug</code></td><td><code>-d</code></td><td>default</td><td>Debug bundle with dev client embedded (if present)</td></tr><tr><td><code>--release</code></td><td><code>-r</code></td><td>—</td><td>Release bundle without dev client (unsigned)</td></tr><tr><td><code>--production</code></td><td><code>-p</code></td><td>—</td><td>Production bundle for app store (signed)</td></tr></tbody></table></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-inject-platform"><a href="#t4l-inject-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l inject &lt;platform&gt;</code></h2>
+<p>Inject tamer-host templates into an existing project. <strong>Platform:</strong> <code>ios</code> | <code>android</code> (required).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Description</th></tr></thead><tbody><tr><td><code>--force</code></td><td><code>-f</code></td><td>Overwrite existing files. Without this, existing files are skipped.</td></tr></tbody></table></div>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> inject</span><span style="color:var(--shiki-token-string)"> android</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> inject</span><span style="color:var(--shiki-token-string)"> ios</span><span style="color:var(--shiki-token-string)"> -f</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-sync-platform"><a href="#t4l-sync-platform" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l sync [platform]</code></h2>
+<p>Sync dev client files (TemplateProvider, MainActivity, DevClientManager) from <code>tamer.config.json</code>. <strong>Platform:</strong> <code>android</code> only (default).</p>
+<p><strong>Note:</strong> This runs automatically during <code>t4l bundle</code> and <code>t4l build</code>. Use it manually when you&#x27;ve changed <code>tamer.config.json</code> (e.g., <code>devServer.host</code> or <code>devServer.port</code>) and want to update the generated Android files without building or bundling.</p>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> sync</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> sync</span><span style="color:var(--shiki-token-string)"> android</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-start"><a href="#t4l-start" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l start</code></h2>
+<p>Start the dev server with HMR and WebSocket support (Expo-like). Shows an <strong>Ink</strong> dashboard: URLs, build status, QR code for the Lynx dev app, optional log panel, and WebSocket connection count.</p>
+<p><strong>Keyboard shortcuts</strong> (while the dashboard is focused): <strong><code>r</code></strong> rebuild the Lynx bundle, <strong><code>l</code></strong> toggle the log panel, <strong><code>q</code></strong> quit (and shut down the server).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Flag</th><th>Short</th><th>Description</th></tr></thead><tbody><tr><td><code>--verbose</code></td><td><code>-v</code></td><td>Show all logs (native + JS). Default shows JS only.</td></tr></tbody></table></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-add-packages"><a href="#t4l-add-packages" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l add [packages...]</code></h2>
+<p>Add <code>@tamer4lynx</code> packages to the Lynx project.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Argument</th><th>Description</th></tr></thead><tbody><tr><td><code>packages...</code></td><td>Package names (e.g. <code>tamer-auth</code>, <code>@tamer4lynx/tamer-auth</code>). Bare names get <code>@tamer4lynx/</code> prefix.</td></tr></tbody></table></div>
+<p><strong>Examples:</strong></p>
+<div class="rp-codeblock language-bash"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="bash"><code><span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> add</span><span style="color:var(--shiki-token-string)"> tamer-auth</span></span>
+<span class="line"><span style="color:var(--shiki-token-function)">t4l</span><span style="color:var(--shiki-token-string)"> add</span><span style="color:var(--shiki-token-string)"> @tamer4lynx/tamer-auth</span><span style="color:var(--shiki-token-string)"> @tamer4lynx/tamer-secure-store</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="Toggle code wrap"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="#22a041" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="Copy code"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="#49cd37" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-add-core"><a href="#t4l-add-core" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l add-core</code></h2>
+<p>Adds the core stack: <strong>tamer-app-shell</strong>, <strong>tamer-screen</strong>, <strong>tamer-router</strong>, <strong>tamer-insets</strong>, <strong>tamer-transports</strong>, <strong>tamer-system-ui</strong>, <strong>tamer-icons</strong>. Each package is resolved to the <strong>highest published semver</strong> on npm (same as <code>t4l add</code> / <code>t4l add-dev</code>). No flags.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-add-dev"><a href="#t4l-add-dev" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l add-dev</code></h2>
+<p>Adds the <strong>dev stack</strong>: <strong>tamer-dev-app</strong>, <strong>tamer-dev-client</strong>, and the <code>@tamer4lynx/*</code> packages they need (<strong>app-shell</strong>, <strong>icons</strong>, <strong>insets</strong>, <strong>plugin</strong>, <strong>router</strong>, <strong>screen</strong>, <strong>system-ui</strong>). Each is resolved to the <strong>highest published semver</strong> on npm (same idea as <code>add-core</code> / <code>t4l add</code>). No flags.</p>
+<hr/>
+<p><strong>After <code>t4l add</code>, <code>t4l add-core</code>, or <code>t4l add-dev</code>:</strong> run <strong><code>t4l link</code></strong> so native modules are wired into iOS/Android.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-codegen"><a href="#t4l-codegen" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l codegen</code></h2>
+<p>Generate code from <code>@lynxmodule</code> declarations in <code>.d.ts</code> files. Run from an extension package root.</p>
+<p>No flags.</p>
+<hr/>
+<h2 class="rp-toc-include" id="t4l-autolink-toggle--t4l-autolink"><a href="#t4l-autolink-toggle--t4l-autolink" class="rp-header-anchor rp-link" aria-hidden="true">#</a><code>t4l autolink-toggle</code> / <code>t4l autolink</code></h2>
+<p>Toggle <code>autolink</code> on/off in <code>tamer.config.json</code>. When enabled, <code>t4l link</code> runs after <strong>installing dependencies</strong> (e.g. <code>postinstall</code> after <code>npm install</code> / <code>pnpm install</code> / <code>bun install</code>). Does not affect build or bundle commands, which always run link.</p>
+<p>No flags.</p>
+<hr/>
+<h2 class="rp-toc-include" id="platform-first-commands"><a href="#platform-first-commands" class="rp-header-anchor rp-link" aria-hidden="true">#</a>Platform-first commands</h2>
+<p>The following form works: <strong><code>t4l &lt;platform&gt; &lt;subcommand&gt; [flags]</code></strong>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>t4l android create</code></td><td>Same as <code>t4l create android</code>. Use <code>-r</code> or <code>--release</code> for dev-app.</td></tr><tr><td><code>t4l android link</code></td><td>Same as <code>t4l link android</code></td></tr><tr><td><code>t4l android bundle</code></td><td>Same as <code>t4l bundle android</code>. Flags: <code>-d</code>, <code>-r</code>, <code>-p</code>.</td></tr><tr><td><code>t4l android build</code></td><td>Same as <code>t4l build android</code>. Flags: <code>-d</code>, <code>-r</code>, <code>-p</code>, <code>-i</code>, <code>-e</code>, <code>-C</code>.</td></tr><tr><td><code>t4l android sync</code></td><td>Same as <code>t4l sync android</code></td></tr><tr><td><code>t4l android inject</code></td><td>Same as <code>t4l inject android</code>. Flag: <code>-f</code>.</td></tr><tr><td><code>t4l ios create</code></td><td>Same as <code>t4l create ios</code></td></tr><tr><td><code>t4l ios link</code></td><td>Same as <code>t4l link ios</code></td></tr><tr><td><code>t4l ios bundle</code></td><td>Same as <code>t4l bundle ios</code>. Flags: <code>-d</code>, <code>-r</code>, <code>-p</code>.</td></tr><tr><td><code>t4l ios build</code></td><td>Same as <code>t4l build ios</code>. Flags: <code>-d</code>, <code>-r</code>, <code>-p</code>, <code>-i</code>, <code>--ipa</code>, <code>-e</code>.</td></tr><tr><td><code>t4l ios inject</code></td><td>Same as <code>t4l inject ios</code>. Flag: <code>-f</code>.</td></tr></tbody></table></div>
+<p><strong>Note:</strong> Use <code>t4l link ios</code> or <code>t4l link android</code> (not <code>--ios</code> / <code>--android</code>).</p><!--/$--></div><footer class="rp-doc-footer"><div class="rp-doc-footer__edit"></div><div class="rp-doc-footer__divider"></div><div class="rp-prev-next-page"><a href="/guide/example-anatomy.html" class="rp-prev-next-page__item rp-prev-next-page__prev rp-link"><span class="rp-prev-next-page__item__desc">Previous page</span><span class="rp-prev-next-page__item__title"><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-prev-next-page__icon rp-prev-next-page__rotate_180"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg><span>Example Anatomy</span></span></a><a href="/packages/index.html" class="rp-prev-next-page__item rp-prev-next-page__next rp-link"><span class="rp-prev-next-page__item__desc">Next page</span><span class="rp-prev-next-page__item__title"><span>Packages</span><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-prev-next-page__icon"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></span></a></div></footer></main></div><aside class="rp-doc-layout__outline rp-scrollbar"><div class="rp-outline"><div class="rp-outline__title">ON THIS PAGE<svg width="14" height="14" class="rp-progress-circle"><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-divider-light)" stroke-width="2"></circle><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-brand)" stroke-width="2" stroke-dasharray="37.69911184307752" stroke-dashoffset="37.69911184307752" transform="rotate(-90 7 7)" style="transition:stroke-dashoffset 0.3s"></circle></svg></div><nav class="rp-outline__toc rp-scrollbar"><a href="#global" class="rp-toc-item rp-link" title="Global" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">Global</span></a><a href="#developing-the-cli-this-repository" class="rp-toc-item rp-link" title="Developing the CLI (this repository)" style="padding-left:12px" data-depth="1"><span class="rp-toc-item__text rp-doc">Developing the CLI (this repository)</span></a><a href="#t4l-init" class="rp-toc-item rp-link" title="t4l init" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l init</code></span></a><a href="#t4l-signing-platform" class="rp-toc-item rp-link" title="t4l signing [platform]" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l signing [platform]</code></span></a><a href="#t4l-create-target" class="rp-toc-item rp-link" title="t4l create &lt;target&gt;" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l create &lt;target></code></span></a><a href="#t4l-build-platform" class="rp-toc-item rp-link" title="t4l build &lt;platform&gt;" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l build &lt;platform></code></span></a><a href="#t4l-link-platform" class="rp-toc-item rp-link" title="t4l link [platform]" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l link [platform]</code></span></a><a href="#t4l-bundle-platform" class="rp-toc-item rp-link" title="t4l bundle [platform]" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l bundle [platform]</code></span></a><a href="#t4l-inject-platform" class="rp-toc-item rp-link" title="t4l inject &lt;platform&gt;" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l inject &lt;platform></code></span></a><a href="#t4l-sync-platform" class="rp-toc-item rp-link" title="t4l sync [platform]" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l sync [platform]</code></span></a><a href="#t4l-start" class="rp-toc-item rp-link" title="t4l start" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l start</code></span></a><a href="#t4l-add-packages" class="rp-toc-item rp-link" title="t4l add [packages...]" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l add [packages...]</code></span></a><a href="#t4l-add-core" class="rp-toc-item rp-link" title="t4l add-core" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l add-core</code></span></a><a href="#t4l-add-dev" class="rp-toc-item rp-link" title="t4l add-dev" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l add-dev</code></span></a><a href="#t4l-codegen" class="rp-toc-item rp-link" title="t4l codegen" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l codegen</code></span></a><a href="#t4l-autolink-toggle--t4l-autolink" class="rp-toc-item rp-link" title="t4l autolink-toggle / t4l autolink" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc"><code>t4l autolink-toggle</code> / <code>t4l autolink</code></span></a><a href="#platform-first-commands" class="rp-toc-item rp-link" title="Platform-first commands" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">Platform-first commands</span></a></nav><div class="rp-outline__divider"></div><div class="rp-outline__bottom"></div></div></aside></div></div>
+    <div id="__rspress_modal_container"></div>
+  </body>
+</html>
