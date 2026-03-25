@@ -1,0 +1,332 @@
+# Tamer4Lynx
+
+Lynx ecosystem of native extensions and tooling. Tamer packages add routing, UI, and platform APIs on top of Lynx for iOS, Android, and web. HarmonyOS support is coming soon.
+
+## Documentation
+
+- [Getting Started](https://tamer4lynx.github.io/guide/getting-started)
+- [Configuration](https://tamer4lynx.github.io/guide/configuration)
+- [CLI commands](https://tamer4lynx.github.io/reference/commands) — `t4l` reference
+- [Packages](https://tamer4lynx.github.io/packages/) — Overview (see also Core, UI, Platform, Tooling sections on the site)
+
+**Install Tamer packages:** do not rely on npm’s **`latest`** or ad-hoc tags like **`@prerelease`** for `@tamer4lynx/*` — **`latest`** may lag (e.g. missing `ios/`). Prefer **`t4l add <pkg>`**, **`t4l add-core`**, or **`t4l add-dev`**, which query the registry and install the **highest published semver** per package, then **`t4l link`**. For manual installs, pin an **explicit version** from the registry.
+
+**Dev / HMR host:** The QR + HMR native app is **built from your project** after **`t4l link`**, so it includes **only** the native modules your app uses. A **single generalized** install-once dev launcher is **planned**; until then, use **`t4l build ios -d`** / **`t4l build android -d`** (see [Getting Started](https://tamer4lynx.github.io/guide/getting-started)).
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| tamer-dev-client | Dev launcher — QR scan, discovery, URL persistence, reload |
+| tamer-host | Production Lynx host templates for injecting into existing apps |
+| tamer-router | File-based routing, Stack and Tabs layouts |
+| tamer-plugin | Rsbuild plugin for tamer config |
+| tamer-app-shell | AppBar, TabBar, Content components |
+| tamer-screen | Screen, SafeArea, AvoidKeyboard |
+| tamer-insets | Safe area and keyboard insets |
+| tamer-system-ui | Status bar, nav bar, theme colors |
+| tamer-icons | Native `<icon>`; fonts; TS via `t4l` `.tamer` / optional import |
+| tamer-webview | Native `<webview>` (WKWebView / Android WebView); TS via `.tamer/tamer-components.d.ts` from `t4l link` |
+| tamer-transports | Fetch, WebSocket, EventSource polyfills |
+| tamer-local-storage | Web `localStorage` API (SharedPreferences / UserDefaults) |
+| jiggle | Vibration/haptic native module |
+| tamer-auth | OAuth 2.0 / PKCE |
+| tamer-secure-store | Secure key-value storage |
+| tamer-biometric | Biometric authentication |
+| tamer-linking | Deep linking |
+| tamer-display-browser | In-app browser for OAuth |
+
+## Links
+
+- [Lynx](https://lynxjs.org/)
+- [Rspeedy](https://lynxjs.org/rspeedy/)
+- [ReactLynx](https://lynxjs.org/react/)
+- [GitHub](https://github.com/tamer4lynx/tamer4lynx)
+
+---
+
+## Coding Notes & Gotchas for AI Agents
+
+These are non-obvious behaviors that differ from standard React/web development. Read before generating code.
+
+### Style Units — Numbers are dp, NOT pixels
+
+Numeric style values are treated as **dp (density-independent pixels)**, not screen pixels. On a high-density device, `fontSize: 12` renders at ~36px — extremely small. Always use string px values for predictable sizing:
+
+```tsx
+// ❌ renders tiny on high-density screens
+<text style={{ fontSize: 12, padding: 8 }} />
+
+// ✅ correct
+<text style={{ fontSize: '16px', padding: '12px' }} />
+```
+
+The `px()` helper from `@tamer4lynx/tamer-app-shell` converts logical pixels correctly for inline styles:
+
+```tsx
+import { px } from '@tamer4lynx/tamer-app-shell'
+<view style={{ padding: px(16), gap: px(12) }} />
+```
+
+`rpx` is a Lynx CSS unit available in `.css` files (750rpx = full screen width). Use it in stylesheets, not inline style objects.
+
+---
+
+### Page Root — Use `<Screen>` as the top-level component
+
+The highest non-layout wrapper for a page should be `<Screen>` from `@tamer4lynx/tamer-screen`. It handles full-screen positioning correctly on both iOS and Android.
+
+```tsx
+import { Screen, SafeArea, AvoidKeyboard } from '@tamer4lynx/tamer-screen'
+
+export default function MyPage() {
+  return (
+    <Screen>
+      <SafeArea>   {/* adds padding for status bar + home indicator */}
+        {/* page content */}
+      </SafeArea>
+    </Screen>
+  )
+}
+```
+
+- **Do not** wrap `<Screen>` inside a `<view>`. It must be the direct root returned by the page component.
+- `<SafeArea>` adds inset padding to clear status bar and home indicator.
+- `<AvoidKeyboard>` shifts content above the software keyboard.
+
+---
+
+### App Icon — Set in `tamer.config.json`
+
+App icons are configured in `tamer.config.json` at the project root, not in Xcode or Android Studio:
+
+```json
+{
+  "icon": {
+    "source": "packages/example/src/assets/logo.png",
+    "androidAdaptive": {
+      "foreground": "packages/example/src/assets/logo.png",
+      "backgroundColor": "#000000",
+      "foregroundScale": 0.62,
+      "foregroundPadding": 6
+    }
+  }
+}
+```
+
+Running `t4l build` or `t4l bundle` syncs the icon from config into the native project automatically. `foregroundScale` (0–1) and `foregroundPadding` (number = % per side) shrink the foreground layer to keep it inside the adaptive icon safe zone.
+
+---
+
+### React Imports — Use `@lynx-js/react`, NOT `react`
+
+All React hooks and APIs must be imported from `@lynx-js/react`. The runtime is Preact-based, not React DOM.
+
+```tsx
+// ❌ wrong
+import { useState, useEffect } from 'react'
+
+// ✅ correct
+import { useState, useEffect } from '@lynx-js/react'
+```
+
+---
+
+### `'background only'` Directive — Required, Not Optional
+
+Any function that touches background-thread APIs (`NativeModules`, `fetch`, `setTimeout`, `setInterval`, state setters, navigation) **must** declare `'background only'` as its first statement:
+
+```tsx
+useEffect(() => {
+  'background only'
+  fetch('/api/data').then(...)
+}, [])
+
+const onTap = useCallback(() => {
+  'background only'
+  setCount(c => c + 1)
+}, [])
+```
+
+Omitting it can cause silent failures or build errors. It must be a string literal as the very first statement of the function body.
+
+---
+
+### Elements — No HTML Tags
+
+There are no `<div>`, `<span>`, `<button>`, `<p>`, or `<img>` elements. Use Lynx primitives:
+
+| Web | Lynx |
+|-----|------|
+| `<div>` | `<view>` |
+| `<span>`, `<p>`, `<h1>` | `<text>` |
+| `<img>` | `<image src={...}>` |
+| `<input>` | `<input>` (Lynx native, different event API) |
+| `<textarea>` | `<textarea>` |
+
+Text must always live inside a `<text>` element. You cannot put a bare string inside a `<view>`.
+
+---
+
+### Scroll — Use `<scroll-view>`, Not `overflow: scroll`
+
+`overflow: scroll` on a `<view>` does nothing. Scrolling requires `<scroll-view>` with an explicit axis attribute:
+
+```tsx
+<scroll-view scroll-y style={{ flex: 1 }}>
+  {/* scrollable content */}
+</scroll-view>
+```
+
+Use `scroll-x` for horizontal scrolling. The attribute is hyphenated (not camelCase).
+
+---
+
+### Events — Lynx Naming, Not DOM Naming
+
+| DOM | Lynx |
+|-----|------|
+| `onClick` | `bindtap` |
+| `onChange` / `onInput` | `bindinput` |
+| `onFocus` | `bindfocus` |
+| `onBlur` | `bindblur` |
+
+Input event values come from `e.detail.value`, not `e.target.value`:
+
+```tsx
+<input
+  bindinput={(e) => setValue(e.detail.value)}
+/>
+```
+
+---
+
+### Navigation — Use `useTamerRouter()`, Not `useNavigate()`
+
+```tsx
+import { useTamerRouter } from '@tamer4lynx/tamer-router'
+
+const { push, pop, replace } = useTamerRouter()
+
+const go = useCallback(() => {
+  'background only'
+  push('/some/route')
+}, [])
+```
+
+Do not use `useNavigate()` from `react-router` directly — it bypasses native transition animations.
+
+---
+
+### File-Based Routing — Layout Files Are `_layout.tsx`
+
+Page files in `src/pages/` are auto-discovered by `tamerRouterPlugin`. Rules:
+- `_layout.tsx` in a directory wraps all child routes (like Next.js `layout.tsx`).
+- The leading underscore is required — `layout.tsx` is ignored.
+- The dev server must be running for route changes to regenerate `generated-routes.ts`.
+
+---
+
+### CSS Inheritance — Disabled by Default
+
+CSS properties like `color` and `fontSize` do **not** inherit from parent elements unless `enableCSSInheritance` is configured in `pluginReactLynx`. Style each `<text>` element directly:
+
+```tsx
+// ❌ color won't cascade down to child <text>
+<view style={{ color: 'white' }}>
+  <text>hello</text>
+</view>
+
+// ✅
+<view>
+  <text style={{ color: 'white' }}>hello</text>
+</view>
+```
+
+---
+
+### `NativeModules` — Global, Never Imported
+
+`NativeModules` is a Lynx global (like `window`). Never import it — just use it directly. Always guard with optional chaining and call only inside `'background only'` contexts:
+
+```tsx
+NativeModules.JiggleModule?.vibrate?.(50)
+```
+
+---
+
+### Image Assets — Use `?inline` Import Query
+
+Local images should be imported with `?inline` so Rspeedy bundles them inline:
+
+```tsx
+import logo from './assets/logo.png?inline'
+
+<image src={logo} style={{ width: '100px', height: '100px' }} />
+```
+
+Images do not auto-size from intrinsic dimensions — always set explicit width/height in styles.
+
+---
+
+### `position: fixed` — Promoted to Root, Not Viewport
+
+`position: fixed` in Lynx removes the element from its layout parent and places it directly under the root node. It does not anchor to a scroll container. Use it only for truly full-screen overlays.
+
+---
+
+### `useInitData()` — Host-Injected Native Data
+
+`useInitData()` from `@lynx-js/react` reads data injected by the native host (iOS/Android) at load time. It is not a React Context — it's a native bridge value. Returns `null` or `{}` if the host provides nothing.
+
+---
+
+### HMR — Use `import.meta.webpackHot`, Not `import.meta.hot`
+
+Rspeedy is Rspack-based, not Vite:
+
+```tsx
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
+}
+```
+
+---
+
+### Attribute Casing — Some Lynx Attributes Are Kebab-Case
+
+Some native element attributes use kebab-case and must be written exactly that way (not camelCase). Example on `<input>`:
+
+```tsx
+<input enable-scroll-bar bindinput={(e) => setValue(e.detail.value)} />
+```
+
+TypeScript won't catch mismatches unless the project's `rspeedy-env.d.ts` declares them with the exact quoted key.
+
+---
+
+### `useScreenOptions()` — Override Header Title Dynamically
+
+A page component can call `useScreenOptions` to set or update the navigation header at runtime:
+
+```tsx
+import { useScreenOptions } from '@tamer4lynx/tamer-router'
+
+export default function MyPage() {
+  useScreenOptions({ title: 'Dynamic Title' })
+  ...
+}
+```
+
+---
+
+### Build-Time Constants — Declare with `declare const`, Guard with `typeof`
+
+Variables injected via `define` in `lynx.config.ts` must be declared and guarded:
+
+```ts
+declare const __MY_VAR__: string
+const value = typeof __MY_VAR__ !== 'undefined' ? __MY_VAR__ : ''
+```
+
+The `typeof` guard prevents `ReferenceError` in non-Rspeedy environments (tests, etc.).
