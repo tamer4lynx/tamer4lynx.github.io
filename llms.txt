@@ -1,0 +1,45 @@
+# Tamer4Lynx
+
+> CLI and npm packages (@tamer4lynx/*) for Lynx: routing, native UI, platform APIs, iOS/Android hosts. HarmonyOS support coming soon.
+
+## Guide
+
+- [Configuration Reference](/guide/configuration.md): Tamer4Lynx uses three configuration files. Each serves a different purpose.
+- [Example App Anatomy](/guide/example-anatomy.md): packages/example is the showcase Lynx app for Tamer4Lynx: file-based routing with three top-level sections (tabs, connectors demos, an M3 component playground), a stack of native-module demos, theming via a Recoil-backed palette, and a switch in index.tsx for testing alternative router shapes. This page walks through what's actually in the package today.
+- [Getting Started](/guide/getting-started.md): There are two flows for running a Lynx project against Tamer. Pick one — your selection sticks for the rest of the page. Both flows start by installing the global t4l CLI from npm. The fastest path. Install the prebuilt Tamer Dev App on your phone or simulator, run t4l start from your project, scan the QR. No Xcode / Android SDK / native build required.
+- [Guide](/guide/index.md)
+- [Native Modules & Elements](/guide/native-modules.md): Tamer wraps Lynx's native module / custom element APIs with autolinking (tamer.config.json + t4l link) so consumers don't manually edit Gradle / Podfile. This page shows how to author a Tamer-compatible native package: a JS-callable native module, a custom UI element, and an optional build-time plugin via tamer.config.ts. For the underlying Lynx APIs, see the upstream guides: Lynx — Use Native ModulesLynx — Custom Native Component
+
+## Commands
+
+- [CLI Commands Reference](/reference/commands.md): Commands use the form t4l <command> [target] [flags]. Target is a platform (ios, android) or, for create, an extension type (module, element, service, combo). All flags support both short and long form (e.g. -d or --debug).
+- [Reference](/reference/index.md): Technical reference for the Tamer4Lynx CLI and related tooling. CLI commands — Full t4l command reference (init, build, link, add, signing, and platform-specific flows).
+
+## Packages
+
+- [Core packages](/packages/core/index.md): Routing, dev tooling, host templates, Rsbuild integration, and app shell primitives used across most Tamer apps. t4l add-core installs everything needed for a production app: host templates, plugin, navigation, router, app-shell, screen, insets, system-ui, icons, transports, and env. t4l add-dev is a superset that also adds the dev launcher packages needed in an app (tamer-dev-client, tamer-linking).
+- [tamer-app-shell](/packages/core/tamer-app-shell.md): App chrome (AppBar / TabBar / Screen / SafeArea) plus a Material 3 component set (Button, Card, FAB, NavigationDrawer, NavigationRail, …) for Lynx. Used by tamer-router Stack / Tab layouts and standalone in any Lynx page.
+- [tamer-dev-client](/packages/core/tamer-dev-client.md): Native dev client module for Tamer4Lynx — QR scan, discovery, URL persistence, reload bridge, embedded dev launcher UI.
+- [tamer-host](/packages/core/tamer-host.md): Production Lynx host templates for injecting LynxView into existing Android and iOS apps.
+- [tamer-navigation](/packages/core/tamer-navigation.md): Native stack transport for Tamer. Provides TamerNav — the push/pop/dispatch bridge between the JS coordinator and native LynxView stack — plus global event hooks for stack lifecycle. This is the layer tamer-router is built on. You can use it directly if you want full control over coordinator logic without file-based routing.
+- [tamer-plugin](/packages/core/tamer-plugin.md): Rsbuild plugin that loads tamer.config from the project and workspace packages, then applies nested plugins.
+- [tamer-router](/packages/core/tamer-router.md): File-based routing for Lynx with React Router 6 + TamerNav native stack coordination. Covers file-based route generation, hardware back handling, and cross-spoke state synchronization.
+- [Packages](/packages/index.md): This page lists every installable @tamer4lynx/* package and how to install it. Why use t4l add instead of npm?Packages are published under @tamer4lynx on npm, but the latest dist-tag does not always point at the newest semver. The CLI resolves each package to npm’s default installable line and then you run t4l link to wire native code. That is the supported path. Manual install (only if you must): npm install @tamer4lynx/<pkg>@<exact-version> with a version taken from the npm registry page, then t4l link. See Example Anatomy for how the repo's sample app combines these packages. Legend: 📦 core = included in t4l add-core. 🛠 dev = added by t4l add-dev (superset of core).
+- [Platform packages](/packages/platform/index.md): Networking polyfills, storage, auth, linking, haptics, and embedded web content. Add only what you need with t4l add <name>. t4l add-core includes tamer-transports but not auth, webview, or local storage.
+- [@tamer4lynx/jiggle](/packages/platform/jiggle.md): Vibration/haptic native module for Lynx. Exposes vibrate(durationMs) to the Lynx runtime.
+- [tamer-auth](/packages/platform/tamer-auth.md): OAuth 2.0 / PKCE auth flow for Lynx. Depends on tamer-linking and tamer-display-browser.
+- [tamer-biometric](/packages/platform/tamer-biometric.md): Biometric authentication for Lynx. Requires BiometricModule.
+- [tamer-display-browser](/packages/platform/tamer-display-browser.md): In-app browser for Lynx. Requires DisplayBrowserModule. Used by tamer-auth for OAuth.
+- [tamer-linking](/packages/platform/tamer-linking.md): Deep linking and external URL handling for Lynx. Requires the native LinkingModule.
+- [tamer-local-storage](/packages/platform/tamer-local-storage.md): Web-standard localStorage API for Lynx: persistent key-value storage via Android SharedPreferences and iOS UserDefaults.
+- [tamer-secure-store](/packages/platform/tamer-secure-store.md): Secure key-value storage for Lynx. Uses native keychain/Keystore. Requires SecureStoreModule.
+- [tamer-transports](/packages/platform/tamer-transports.md): Fetch, WebSocket, and EventSource polyfills for Lynx. Required for HMR and WebSocket in native Lynx apps.
+- [tamer-webview](/packages/platform/tamer-webview.md): Embedded in-app WebView for Lynx: iOS WKWebView, Android android.webkit.WebView. Registers the native custom element <webview> with props such as uri, html, and baseUrl (no JSON blob on the JS side). There is no React wrapper component—you use <webview> in JSX. Behavior and API are informed by react-native-webview (see reference/react-native-webview in this repo). Pages can post messages to the app using the same bridge name as RN: ReactNativeWebView (window.ReactNativeWebView.postMessage(...)).
+- [Tooling](/packages/tooling/index.md): Developer experience and build-time integrations that are not runtime native modules in the same sense as platform packages.
+- [Ambient types for `@tamer4lynx` packages](/packages/tooling/tamer-ambient-types.md): Native Tamer packages that add custom elements (JSX intrinsics) or ambient APIs should expose typings in a way the t4l CLI can discover and aggregate into .tamer/tamer-components.d.ts at the app root.
+- [@tamer4lynx/tamer-env](/packages/tooling/tamer-env.md): Rspeedy / Rsbuild plugin for loading .env files during rspeedy build and rspeedy dev, and injecting values into the Lynx bundle.
+- [UI packages](/packages/ui/index.md): Layout, safe area, system chrome, and icon typography for Lynx screens. These are included in t4l add-core (except optional combinations—see Packages overview).
+- [tamer-icons](/packages/ui/tamer-icons.md): Typings and font assets for the native Lynx <icon> element (Material Icons, Material Symbols, Font Awesome solid + brands). There is no Icon React component — you use <icon> with the native attribute names below.
+- [tamer-insets](/packages/ui/tamer-insets.md): Safe area insets and keyboard state for Lynx. Requires TamerInsetsModule native module.
+- [tamer-screen](/packages/ui/tamer-screen.md): Screen, SafeArea, and AvoidKeyboard components. Re-exports useInsets and useKeyboard from tamer-insets.
+- [tamer-system-ui](/packages/ui/tamer-system-ui.md): Status bar, navigation bar, and theme colors for Lynx. Requires SystemUIModule native module.

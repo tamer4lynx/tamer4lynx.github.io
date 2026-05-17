@@ -1,0 +1,3446 @@
+---
+url: /guide/configuration.md
+---
+
+# Configuration Reference
+
+Tamer4Lynx uses three configuration files. Each serves a different purpose.
+
+***
+
+## 1. Project config: `tamer.config.json`
+
+**Location:** Project root (where you run `t4l`).
+
+**Purpose:** Defines the host native app: Android/iOS project paths, app identity, Lynx bundle location, dev server, and autolinking. Used by the CLI for `t4l create android`, `t4l create ios`, `t4l link`, `t4l build`, `t4l start`, etc.
+
+Create it with `t4l init` or `t4l`.
+
+### Signing and production builds (`-p`)
+
+**Store-ready / signed** native builds use **`t4l build [platform] -p`** (or `--production`). That is separate from **`-r`** (unsigned release without the dev client).
+
+1. Run **`t4l signing`**, **`t4l signing android`**, or **`t4l signing ios`** to write signing-related fields into `tamer.config.json` (and optionally append keystore password env var names to `.env` / `.env.local` on Android). See the full behavior in [Commands](/reference/commands.md) under **`t4l signing`** and **`t4l build`**.
+2. **`t4l build android -p`** or **`t4l build ios -p`** — each command targets one platform and requires signing for that platform only.
+
+On **iOS**, **`-p`** builds for **`iphoneos`** (not the simulator). For App Store submission you still typically archive and export an IPA in Xcode; the CLI documents that limitation in [Commands](/reference/commands.md).
+
+### Fields
+
+| Field                         | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `android`                     | object           | Android app configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `android.appName`             | string           | Display name of the Android app                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `android.packageName`         | string           | Application ID (e.g. `com.example.myapp`)                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `android.sdk`                 | string           | Path to Android SDK (supports `~`, `$ANDROID_HOME`)                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `android.deepLinks`           | array            | Deep link configs for intent filters. Each: `{ scheme, host?, pathPrefix?, activity? }`                                                                                                                                                                                                                                                                                                                                                                                              |
+| `android.abiFilters`          | string\[]        | NDK ABI filters (default: `armeabi-v7a`, `arm64-v8a`)                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ios`                         | object           | iOS app configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `ios.appName`                 | string           | Display name of the iOS app                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `ios.bundleId`                | string           | Bundle identifier (e.g. `com.example.MyApp`)                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `ios.urlSchemes`              | array            | URL schemes for deep linking. Each: `{ scheme, role? }`                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `ios.architectures`           | string\[]        | Build architectures (default: `arm64`)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `lynxProject`                 | string           | Path to Lynx project (e.g. `packages/example`). Omit for single-folder layout (Lynx app is project root) or to auto-discover via workspaces                                                                                                                                                                                                                                                                                                                                          |
+| `paths`                       | object           | Override default paths                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `paths.androidDir`            | string           | Android project directory (default: `android`)                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `paths.iosDir`                | string           | iOS project directory (default: `ios`)                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `paths.lynxProject`           | string           | Same as top-level `lynxProject`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `paths.lynxBundleRoot`        | string           | Bundle output dir inside Lynx project (default: `dist`)                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `paths.lynxBundleFile`        | string           | Primary bundle filename (default: `main.lynx.bundle`); used as default URL in dev `meta.json`                                                                                                                                                                                                                                                                                                                                                                                        |
+| `paths.lynxAdditionalBundles` | string\[]        | More bundle filenames in the **same** `lynxBundleRoot` (e.g. `auth.lynx.bundle`). `t4l start` lists them in `meta.json` (`bundles`), and `t4l bundle` / embeddable checks that each file exists after `npm run build`. Assets are still copied from the whole output dir.                                                                                                                                                                                                            |
+| `dev`                         | object           | Dev mode configuration (optional). Dev client inclusion is now controlled by build type: **debug** (`-d`) embeds the dev client when `@tamer4lynx/tamer-dev-client` is installed; **release** (`-r`) omits it.                                                                                                                                                                                                                                                                       |
+| `dev.mode`                    | string           | `standalone` \| `embedded` \| `off`. Prefer `-d` / `-r` for dev client behavior when applicable.                                                                                                                                                                                                                                                                                                                                                                                     |
+| `devServer`                   | object           | Dev server for HMR (host, port). Used when dev client is present.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `devServer.host`              | string           | Host for native app to connect (e.g. `10.0.2.2` for Android emulator)                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `devServer.port`              | number           | Dev server port (default: 3000)                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `devServer.httpPort`          | number           | Alternative to `port`                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `icon`                        | string \| object | App icon: path string, or `{ source?, android?, ios?, androidAdaptive? }`. **`androidAdaptive`** (Android 8+): `{ foreground, background? }` or `{ foreground, backgroundColor? }`. Optional layout: **`foregroundScale`**: 0–1 uniform shrink (e.g. `0.62`); **`foregroundPadding`**: extra inset as number (% per side), `"8dp"`, `"10%"`, or `{ left, top, right, bottom }`. Scale and padding are merged into `<layer-list>` insets. `t4l build` / `t4l bundle` refreshes icons. |
+| `autolink`                    | boolean          | When `true`, `t4l link` runs after `npm install` (if postinstall is configured)                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `syncTamerComponentTypes`     | boolean          | When not `false` (default), `t4l init` / `t4l link` generate `.tamer/tamer-components.d.ts` and update `tsconfig` `include`. Set to `false` to skip                                                                                                                                                                                                                                                                                                                                  |
+
+### iOS autolink artifacts
+
+Besides `Podfile` and `LynxInitProcessor.swift`, **`t4l link ios`** (and any command that runs iOS autolink) may generate:
+
+| File                             | When                                                | Purpose                                                                                                                               |
+| -------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `tamer-host-native-modules.json` | `@tamer4lynx/tamer-dev-client` is in `node_modules` | Lists `moduleClassName` values for dev-client **compatibility** with dev server `meta.json`; copied into the app bundle as a resource |
+
+Commit this JSON (or re-run `t4l link ios` on CI) so the app stays aligned with linked native packages.
+
+### Examples
+
+**Single-folder layout** (Lynx app, config, android/, ios/ in one directory — omit `lynxProject`):
+
+```json
+{
+  "android": { "appName": "MyApp", "packageName": "com.example.myapp", "sdk": "~/Library/Android/sdk" },
+  "ios": { "appName": "MyApp", "bundleId": "com.example.MyApp" },
+  "paths": { "androidDir": "android", "iosDir": "ios" },
+  "autolink": true
+}
+```
+
+**Monorepo layout** (Lynx app in a package):
+
+```json
+{
+  "android": { "appName": "MyApp", "packageName": "com.example.myapp", "sdk": "~/Library/Android/sdk" },
+  "ios": { "appName": "MyApp", "bundleId": "com.example.MyApp" },
+  "lynxProject": "packages/example",
+  "paths": { "androidDir": "android", "iosDir": "ios" },
+  "autolink": true
+}
+```
+
+**Android adaptive icon** (light logo on dark): set `foreground` to the logo asset and `backgroundColor` instead of a background image:
+
+```json
+{
+  "icon": {
+    "source": "packages/example/src/assets/logo.png",
+    "androidAdaptive": {
+      "foreground": "packages/example/src/assets/logo.png",
+      "backgroundColor": "#000000"
+    }
+  }
+}
+```
+
+If the logo is clipped by the launcher mask, shrink and/or pad the foreground layer:
+
+```json
+{
+  "androidAdaptive": {
+    "foreground": "packages/example/src/assets/logo.png",
+    "backgroundColor": "#000000",
+    "foregroundScale": 0.62,
+    "foregroundPadding": 6
+  }
+}
+```
+
+`foregroundScale=0.62` adds `((1−0.62)/2)*100 ≈ 19%` inset on each side. `foregroundPadding=6` adds another 6% per side. Both are merged into `android:left/top/right/bottom` on a `<layer-list>` item — no `ScaleDrawable` quirks.
+
+Keep `source` (and optional `ios`) so fallback launcher mipmaps and the iOS app icon still resolve from the same file.
+
+***
+
+## 2. Component config: `tamer.config.ts` (or `.mjs` / `.js`)
+
+**Location:** Project root or in packages that export `./tamer.config`.
+
+**Purpose:** Rsbuild plugin configuration. Used by **tamer-plugin** to load plugin instances (e.g. tamer-router, file-based routing). This is **not** the same as `tamer.config.json` — it is a TypeScript/JS module that exports plugin defaults.
+
+**Used by:** `pluginTamer()` in your `lynx.config.ts`. Do not import `tamer.config` in `lynx.config`; use `pluginTamer()` so it loads `tamer.config` internally.
+
+### Format
+
+Export an object (default or `tamerDefaults`) with keys such as:
+
+- `rsbuildConfig` — partial Rsbuild config (e.g. `source.preEntry`)
+- Plugin keys — e.g. `tamerRouter` for tamer-router's plugin
+
+### Example
+
+```ts
+import { tamerRouterPlugin } from '@tamer4lynx/tamer-router'
+
+export default {
+  tamerRouter: tamerRouterPlugin({
+    root: './src/pages',
+    output: './src/generated/_generated_routes.tsx',
+    layoutFilename: '_layout.tsx',
+  }),
+}
+```
+
+### Discovery order
+
+1. Project root: `tamer.config.ts` → `tamer.config.mjs` → `tamer.config.js`
+2. Workspace packages that export `./tamer.config`
+3. `node_modules` packages that export `./tamer.config`
+
+See [tamer-plugin](/packages/core/tamer-plugin.md) for details.
+
+***
+
+## 3. Extension config: `lynx.ext.json`
+
+**Location:** Inside each native extension package (e.g. `node_modules/@tamer4lynx/jiggle/lynx.ext.json`).
+
+**Purpose:** Declares how the extension integrates with Android and iOS. Used by the autolinker (`t4l link`) to add the native module to Gradle and Podfile, register modules/elements, and sync permissions.
+
+Tamer4Lynx follows the [Lynx Autolink RFC](https://github.com/lynx-family/lynx/discussions/2653). If you want to help improve the RFC or lynx.ext.json format, see the [RFC discussion](https://github.com/lynx-family/lynx/discussions/2653).
+
+### Format (RFC `platforms`)
+
+```json
+{
+  "platforms": {
+    "android": { ... },
+    "ios": { ... },
+    "web": {}
+  }
+}
+```
+
+### Android fields
+
+| Field              | Type      | Description                                                |
+| ------------------ | --------- | ---------------------------------------------------------- |
+| `packageName`      | string    | Java/Kotlin package (e.g. `com.example.mymodule`)          |
+| `moduleClassName`  | string    | Native module class (e.g. `com.example.mymodule.MyModule`) |
+| `moduleClassNames` | string\[] | Multiple modules                                           |
+| `sourceDir`        | string    | Path to Android source (default: `android`)                |
+| `elements`         | object    | Custom elements: `{ "tag-name": "ClassName" }`             |
+| `permissions`      | string\[] | Android permissions to merge into manifest                 |
+| `attachHostView`   | boolean   | Attach module to host view lifecycle                       |
+| `activityPatches`  | object    | Activity lifecycle hooks: `onCreate`, `onResume`, etc.     |
+
+### iOS fields
+
+| Field              | Type      | Description                                              |
+| ------------------ | --------- | -------------------------------------------------------- |
+| `podspecPath`      | string    | Path to podspec directory (e.g. `ios/mymodule`)          |
+| `moduleClassName`  | string    | Native module class name                                 |
+| `moduleClassNames` | string\[] | Multiple modules                                         |
+| `elements`         | object    | Custom elements: `{ "tag-name": "ClassName" }`           |
+| `iosPermissions`   | object    | Info.plist keys: `{ "NSCameraUsageDescription": "..." }` |
+| `attachHostView`   | boolean   | Attach module to host view lifecycle                     |
+
+### Example
+
+```json
+{
+  "platforms": {
+    "android": {
+      "packageName": "com.nanofuxion.vibration",
+      "moduleClassName": "com.nanofuxion.vibration.JiggleModule",
+      "sourceDir": "android"
+    },
+    "ios": {
+      "podspecPath": "ios/jiggle",
+      "moduleClassName": "JiggleModule"
+    },
+    "web": {}
+  }
+}
+```
+
+### `tamer.json` (flat format)
+
+Tamer4Lynx also supports `tamer.json` (flat format). Prefer `lynx.ext.json` with `platforms` for new extensions.
+
+***
+
+## Summary
+
+| Config              | Location               | Used by               | Purpose                                                     |
+| ------------------- | ---------------------- | --------------------- | ----------------------------------------------------------- |
+| `tamer.config.json` | Project root           | t4l CLI               | Host app: Android/iOS identity, paths, dev server, autolink |
+| `tamer.config.ts`   | Project root, packages | tamer-plugin          | Rsbuild plugins (routing, etc.)                             |
+| `lynx.ext.json`     | Extension package      | t4l link (autolinker) | Native module registration per platform                     |
+
+
+
+---
+url: /guide/example-anatomy.md
+---
+
+# Example App Anatomy
+
+`packages/example` is the showcase Lynx app for Tamer4Lynx: file-based routing with three top-level sections (tabs, connectors demos, an M3 component playground), a stack of native-module demos, theming via a Recoil-backed palette, and a switch in `index.tsx` for testing alternative router shapes.
+
+This page walks through what's actually in the package today.
+
+***
+
+## Directory structure
+
+```
+packages/example/
+├── lynx.config.ts          # Rspeedy: pluginTamer, pluginQRCode, pluginReactLynx, pluginTamerEnv, pluginTypeCheck; workspace aliases; OAuth define
+├── package.json            # Depends on every @tamer4lynx/* package; some via file: paths in the monorepo
+├── tsconfig.json
+├── biome.json              # Biome lint/format
+├── vitest.config.ts        # Vitest + jsdom
+├── server.t.s              # Optional dev helper (`bun run server`)
+├── .env / .env.example     # OAuth + transport env vars
+├── intrinsic-element.d.ts  # Augments Lynx JSX for input, textarea, svg
+├── src/
+│   ├── index.tsx                       # Entry — switches between Stack / ExampleStack / FileRouterApp via testExample
+│   ├── App.tsx                         # Standalone (non-router) entry; reachable when testExample=0/1
+│   ├── App.css
+│   ├── Stack.tsx                       # Manual stack used by App.tsx
+│   ├── example_stack.tsx               # Alternative manual stack
+│   ├── file-router-app.tsx             # FileRouter wired with providerConnector + DetailsRecoilProvider
+│   ├── tamer-app-routes.tsx            # Re-exports TamerAppRoutes / TAMER_KNOWN_PATHS from tamer-router/generated-app-routes
+│   ├── examplePalette.ts               # useExamplePalette() — central palette + theme bootstrap
+│   ├── useSyncNavigationChrome.ts      # Keeps status / navigation bar colors in sync with palette
+│   ├── connectors-state.tsx            # Provider registry for connector demos (zustand, redux, recoil, …)
+│   ├── connectors-demo-page.tsx        # Shared scaffolding for each /connectors/* demo
+│   ├── details-recoil-state.tsx        # Recoil provider used by FileRouterApp
+│   ├── demo-store.ts                   # Shared store data fed to connectors
+│   ├── oauth-config.ts                 # OAuth client config for the `native/auth` route
+│   ├── tamer-icons-fonts.generated.ts  # Generated font manifest for tamer-icons
+│   ├── rspeedy-env.d.ts                # JSX typings for app-bar, icon
+│   ├── polyfills/                      # url-search-params and friends
+│   ├── assets/                         # tamer / lynx / react logos
+│   ├── fonts/                          # Material Icons + Font Awesome .ttf (used by tamer-icons-fonts.generated.ts)
+│   ├── __tests__/                      # vitest specs
+│   └── pages/
+│       ├── index.tsx                   # `/` — emits a Slot so the file router resolves into the appropriate group layout
+│       ├── not_layout.tsx              # Reserved name; file router treats it as a non-layout page
+│       ├── tabs/
+│       │   ├── _layout.tsx             # Bottom Tab bar layout (Tab / Tab.Screen) + palette-driven status/nav chrome
+│       │   ├── index.tsx               # Home
+│       │   ├── about.tsx
+│       │   ├── insets.tsx              # tamer-insets demo + <textarea>
+│       │   ├── screen.tsx              # tamer-screen
+│       │   └── secure.tsx              # tamer-secure-store + tamer-biometric
+│       ├── m3/
+│       │   ├── _layout.tsx             # Stack with pathPrefix /m3
+│       │   ├── index.tsx               # M3 component gallery
+│       │   └── nav.tsx                 # M3 navigation patterns
+│       ├── connectors/
+│       │   ├── _layout.tsx             # Stack with pathPrefix /connectors
+│       │   ├── index.tsx               # Demo index
+│       │   ├── zustand.tsx       + zustand-detail.tsx
+│       │   ├── redux.tsx         + redux-detail.tsx
+│       │   ├── tanstack-query.tsx + tanstack-query-detail.tsx
+│       │   ├── apollo.tsx        + apollo-detail.tsx
+│       │   ├── swr.tsx           + swr-detail.tsx
+│       │   ├── jotai.tsx         + jotai-detail.tsx
+│       │   ├── i18next.tsx       + i18next-detail.tsx
+│       │   ├── recoil.tsx        + recoil-detail.tsx
+│       │   └── theme.tsx         + theme-detail.tsx
+│       └── native/
+│           ├── _layout.tsx             # Stack with pathPrefix /native + palette chrome
+│           ├── index.tsx               # Hub linking into the demos below
+│           ├── auth.tsx                # tamer-auth (OAuth / PKCE)
+│           ├── linking.tsx             # tamer-linking
+│           ├── browser.tsx             # tamer-display-browser
+│           ├── storage.tsx             # tamer-local-storage
+│           ├── transports.tsx          # tamer-transports
+│           ├── webview.tsx             # tamer-webview (<webview>)
+│           └── details/
+│               ├── _layout.tsx
+│               ├── [id].tsx            # Dynamic route, recoil-driven detail screen
+│               └── edit.tsx
+```
+
+***
+
+## Entry point — three router shapes via a switch
+
+`src/index.tsx` lets you flip between three router setups by editing `testExample`:
+
+```tsx
+import 'url-search-params-polyfill'
+import '@lynx-js/react/debug'
+import '@tamer4lynx/tamer-transports/lynx'
+import { root } from '@lynx-js/react'
+
+import Stack from './Stack.jsx'
+import ExampleStack from './example_stack.jsx'
+import { FileRouterApp } from './file-router-app.js'
+
+const testExample: number = -1
+
+let component: JSX.Element
+switch (testExample) {
+  case 0:
+    component = <Stack />
+    break
+  case 1:
+    component = <ExampleStack />
+    break
+  default:
+    component = <FileRouterApp />
+    break
+}
+
+root.render(component)
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
+}
+```
+
+- **`Stack` / `ExampleStack`** — manual, hand-written router shapes used to validate `tamer-router` primitives without the file-based plugin.
+- **`FileRouterApp`** — the default and recommended setup. Pulls routes from the tamer-router plugin's generated tree.
+- **`@tamer4lynx/tamer-transports/lynx`** — required side-effect import that polyfills `fetch`, `WebSocket`, `EventSource` for HMR + native networking.
+
+***
+
+## FileRouterApp — connectors and Recoil
+
+`src/file-router-app.tsx` wires the file router with a registry of provider connectors so each `/connectors/*` demo gets its own state library at the top of the tree:
+
+```tsx
+import { FileRouter } from '@tamer4lynx/tamer-router'
+import '@tamer4lynx/tamer-icons'
+import './tamer-app-routes.js'
+import { DetailsRecoilProvider, detailsRecoilProviderConnector } from './details-recoil-state.js'
+import { connectorsProviderRegistry } from './connectors-state.js'
+import { useExamplePalette } from './examplePalette.js'
+
+const bridgeProviderConnector = [
+  detailsRecoilProviderConnector,
+  ...connectorsProviderRegistry,
+]
+
+export function FileRouterApp() {
+  useExamplePalette()
+  return (
+    <DetailsRecoilProvider>
+      <FileRouter providerConnector={bridgeProviderConnector} />
+    </DetailsRecoilProvider>
+  )
+}
+```
+
+- **`useExamplePalette()`** — pulls a Recoil-backed palette + theme; the layouts read it via `useSyncNavigationChrome` to color the status / nav bars.
+- **`providerConnector`** — array of provider factories the router mounts at the right place in the tree (one per demo).
+- **`tamer-app-routes.tsx`** — re-exports `TamerAppRoutes` + `TAMER_KNOWN_PATHS` from the auto-generated route module so other files can reference paths without stringly-typed URLs.
+
+***
+
+## lynx.config.ts
+
+Wires Rspeedy with Tamer plugins and workspace aliases:
+
+| Section          | Purpose                                                                                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `resolve.alias`  | Points `@tamer4lynx/tamer-app-shell`, `tamer-navigation`, `tamer-router` (and a few others) at local `../<pkg>/src` so monorepo dev sees source, not dist; also aliases `react` → `@lynx-js/react/compat`. |
+| `resolve.dedupe` | Forces single copies of `@react-navigation/core` + `@react-navigation/routers`.                                                                                                                            |
+| `source.define`  | Injects OAuth env vars (`OAUTH_CLIENT_ID`, etc.) loaded from `.env`.                                                                                                                                       |
+| `plugins`        | `pluginTamer({ tamerRouter })`, `pluginReactLynx`, `pluginQRCode` (fullscreen QR scheme), `pluginTamerEnv`, `pluginTypeCheck` (when `TAMER_TYPE_CHECK=1`).                                                 |
+
+`pluginTamer({ tamerRouter })` is what generates the route tree the file router consumes; `tamerRouter` is created with `tamerRouterPlugin({ root: './src/pages', output: 'src/generated-routes.tsx', layoutFilename: '_layout.tsx' })`.
+
+***
+
+## Routing
+
+### `pages/index.tsx`
+
+Top-level entry just emits a `<Slot />` so the file router resolves the first matching child group:
+
+```tsx
+import { Slot } from '@tamer4lynx/tamer-router'
+
+export default function IndexEntry() {
+  return <Slot />
+}
+```
+
+### Tab bar — `pages/tabs/_layout.tsx`
+
+```tsx
+import { Tab } from '@tamer4lynx/tamer-router'
+import { useSystemUI } from '@tamer4lynx/tamer-system-ui'
+import { useExamplePalette } from '../../examplePalette.js'
+import { useSyncNavigationChrome } from '../../useSyncNavigationChrome.js'
+
+export default function Layout() {
+  const { setStatusBar, setNavigationBar } = useSystemUI()
+  const p = useExamplePalette()
+  const dark = p.theme?.isDark !== false
+  useSyncNavigationChrome(setStatusBar, setNavigationBar, p.barBackground, dark)
+
+  return (
+    <Tab>
+      <Tab.Screen name="index" options={{ title: 'Tamer4Lynx', icon: 'home' }} />
+      <Tab.Screen name="about" options={{ title: 'About', icon: 'info' }} />
+      <Tab.Screen name="insets" options={{ title: 'Insets', icon: 'settings' }} />
+      <Tab.Screen name="screen" options={{ title: 'Screen', icon: 'list' }} />
+      <Tab.Screen name="secure" options={{ title: 'Secure Number', icon: 'lock' }} />
+    </Tab>
+  )
+}
+```
+
+Note: this app uses **`Tab`** (singular) — `Tab.Screen` for each route. Earlier APIs exposed it as `Tabs` / `Tabs.Screen`; the example tracks the current export.
+
+### Stack groups — `pages/native/_layout.tsx` (and `m3`, `connectors`)
+
+Stacks declare a `pathPrefix` so nested files resolve relative to the group:
+
+```tsx
+import { Stack } from '@tamer4lynx/tamer-router'
+
+export default function DevLayout() {
+  // …palette + chrome sync omitted
+  return (
+    <Stack pathPrefix="/native">
+      <Stack.Screen name="index" options={{ title: 'Native Tests' }} />
+      <Stack.Screen name="auth" options={{ title: 'OAuth' }} />
+      <Stack.Screen name="linking" options={{ title: 'tamer-linking' }} />
+      <Stack.Screen name="browser" options={{ title: 'tamer-display-browser' }} />
+      <Stack.Screen name="storage" options={{ title: 'tamer-local-storage' }} />
+      <Stack.Screen name="webview" options={{ title: 'tamer-webview' }} />
+      <Stack.Screen name="transports" options={{ title: 'tamer-transports' }} />
+    </Stack>
+  )
+}
+```
+
+The `connectors/_layout.tsx` follows the same shape with one `Stack.Screen` per state-library demo (zustand, redux, tanstack-query, apollo, swr, jotai, i18next, recoil, theme — each with a matching `-detail` screen). `m3/_layout.tsx` covers the M3 component playground (`index`, `nav`).
+
+***
+
+## Pages and packages
+
+| Route group   | Pages                                                                                                           | Packages exercised                                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tabs/`       | `index`, `about`, `insets`, `screen`, `secure`                                                                  | tamer-router, tamer-icons, tamer-system-ui, tamer-insets, tamer-screen, tamer-secure-store, tamer-biometric, jiggle                                               |
+| `m3/`         | `index`, `nav`                                                                                                  | M3-styled components built on Lynx primitives                                                                                                                     |
+| `connectors/` | `zustand`, `redux`, `tanstack-query`, `apollo`, `swr`, `jotai`, `i18next`, `recoil`, `theme` (each + `-detail`) | Demonstrates one external state / data library per route. Providers are registered via `connectorsProviderRegistry`.                                              |
+| `native/`     | `index`, `auth`, `linking`, `browser`, `storage`, `transports`, `webview`, `details/[id]`, `details/edit`       | tamer-auth (OAuth), tamer-linking, tamer-display-browser, tamer-local-storage, tamer-transports, tamer-webview, plus a Recoil-backed dynamic `details/[id]` route |
+
+***
+
+## Assets and fonts
+
+- **Images** — `src/assets/` PNGs imported by the home screen (`tamer-logo`, `lynx-logo`, `react-logo`).
+- **Fonts** — `tamer-icons-fonts.generated.ts` maps Material Icons + Font Awesome (solid, regular, brands) CDN URLs to local `./fonts/*.ttf` for [tamer-icons](/packages/ui/tamer-icons.md). The tamer-icons build downloads + caches these on first run.
+
+***
+
+## TypeScript
+
+- **`intrinsic-element.d.ts`** — extends Lynx's JSX namespace with `<input>`, `<textarea>`, and `<svg content="…" />`.
+- **`rspeedy-env.d.ts`** — declares `app-bar` + `icon` for JSX completeness.
+- Generated route types land in `src/generated-routes.tsx` / `routeTree.gen.ts` from the tamer-router plugin.
+
+***
+
+## Scripts
+
+| Script         | Command                                                         | Purpose                                                 |
+| -------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
+| `dev`          | `rspeedy dev`                                                   | Dev server with HMR                                     |
+| `build`        | `rspeedy build`                                                 | Production bundle                                       |
+| `build:native` | `rspeedy build` + copy bundle into the local Android assets dir | Helper for direct on-device testing inside the monorepo |
+| `preview`      | `rspeedy preview`                                               | Web preview                                             |
+| `test`         | `vitest run`                                                    | Unit tests                                              |
+| `check`        | `biome check --write`                                           | Lint + format check                                     |
+| `format`       | `biome format --write`                                          | Format                                                  |
+| `server`       | `bun run server.t.s`                                            | Optional dev helper for the transport demos             |
+
+From the monorepo root, use `t4l start` and `t4l build ios` / `t4l build android` to run the dev server and build the native shells.
+
+***
+
+## Next steps
+
+- [Getting Started](/guide/getting-started.md) — Set up a new project (prebuilt dev app or DIY)
+- [Native Modules & Elements](/guide/native-modules.md) — Author a Tamer-compatible native package
+- [Configuration](/guide/configuration.md) — `tamer.config.json`, `lynx.config.ts`, `lynx.ext.json`
+- [tamer-router](/packages/core/tamer-router.md) — File-based routing details
+
+
+
+---
+url: /guide/getting-started.md
+---
+
+# Getting Started
+
+There are two flows for running a Lynx project against Tamer. Pick one — your selection sticks for the rest of the page. Both flows start by installing the global **`t4l`** CLI from npm.
+
+![](/assets/icon-tamer.png)Tamer App (prebuilt)DevDev Client (build it yourself)The fastest path. Install the **prebuilt Tamer Dev App** on your phone or simulator, run `t4l start` from your project, scan the QR. No Xcode / Android SDK / native build required.
+:::tip Use this flow when…
+You want to iterate on Lynx UI without touching native code, or you don't have Xcode / Android SDK installed locally.
+:::
+## 1. Install the CLI globally
+You still need `t4l init` and `t4l start` to configure the project and run the dev server. Install the CLI globally with your package manager:
+npmYarnpnpmBun
+```bash
+npm i -g @tamer4lynx/cli@latest
+```
+## 2. Install the prebuilt app
+Download from the [latest release](https://github.com/tamer4lynx/tamer4lynx/releases/latest):
+![](/assets/icon-ios.svg)iOS![](/assets/icon-android.svg)Android**Simulator** — download `TamerDevApp-Simulator-<version>.zip`, unzip, install on a booted simulator:
+```bash
+unzip TamerDevApp-Simulator-<version>.zip
+xcrun simctl install booted ./TamerDevApp.app
+xcrun simctl launch booted com.nanofuxion.tamerdevapp
+```
+**Device** — download `TamerDevApp-Device-Unsigned-<version>.zip`. The `.app` ships unsigned to keep the release portable. Re-sign with your own Apple identity, embed a provisioning profile that matches `com.nanofuxion.tamerdevapp` (or rewrite the bundle id), wrap as IPA, install. Step-by-step in the bundled `SIGN-AND-INSTALL.txt`.
+## 3. Initialize your Lynx project
+From your Lynx project root, run the interactive setup once:
+```bash
+t4l init
+```
+The wizard detects or creates a Lynx app, writes `tamer.config.json`, installs the selected Tamer package stack, injects `pluginTamer()` into `lynx.config.*` when possible, and wires TypeScript ambient component types when a `tsconfig.json` is present. If the Lynx app is nested, it also configures the root as a workspace and installs from the root so dependencies are shared.
+## 4. Run the dev server
+From your Lynx project root:
+```bash
+t4l start
+```
+The dashboard prints a QR. Scan it inside the prebuilt Tamer Dev App — bundles hot-reload over the dev server. Done.
+If the configured/default port is already in use, `t4l start` automatically tries the next port and shows that the active port differs from the configured/default port.
+## When this flow runs out
+Switch to the **Dev Client** flow if you need any of:
+- A **custom native module** or **custom element** that isn't shipped in the prebuilt app.
+- A different **bundle id**, app icon, or signing identity (e.g. shipping to TestFlight under your own team).
+- A **smaller binary** that includes only the Tamer packages your app actually uses.
+
+## CLI and workspace notes
+
+- **Environment files:** `t4l` loads `.env` then `.env.local` beside `tamer.config.json`. Shell / CI exports take precedence. See [Commands → Global](/reference/commands.md) for the full variable list (`ANDROID_KEYSTORE_PASSWORD`, `APP_STORE_CONNECT_API_KEY_PATH`, etc.).
+- **Interactive flows:** **`t4l init`** and **`t4l signing`** are Ink wizards. **`t4l start`** is an Ink dashboard: **`r`** rebuild bundle, **`l`** toggle logs, **`q`** quit.
+- **TypeScript:** With **`syncTamerComponentTypes`** enabled (default in new configs), **`t4l init`** / **`t4l link`** can adjust the Lynx app `tsconfig.json` and generate **`.tamer/tamer-components.d.ts`**. Details: [Ambient types](/packages/tooling/tamer-ambient-types.md).
+
+Worth exploring next: [tamer-router](/packages/core/tamer-router.md) (back handling), [tamer-webview](/packages/platform/tamer-webview.md), [tamer-local-storage](/packages/platform/tamer-local-storage.md), [tamer-dev-client](/packages/core/tamer-dev-client.md).
+
+## Next steps
+
+- [Native Modules & Elements](/guide/native-modules.md) — author your own Tamer-compatible native package
+- [Configuration Reference](/guide/configuration.md) — `tamer.config.json`, `tamer.config.ts`, `lynx.ext.json`
+- [Commands](/reference/commands.md) — full CLI reference
+- [tamer-dev-client](/packages/core/tamer-dev-client.md) — Dev launcher API and setup
+
+## Lynx ecosystem
+
+- [Lynx](https://lynxjs.org/) — Cross-platform rendering engine
+- [Rspeedy](https://lynxjs.org/rspeedy/) — Build tool for Lynx
+- [ReactLynx](https://lynxjs.org/react/) — React on Lynx
+
+## Framework agnostic
+
+Tamer4Lynx is conceptually Lynx framework agnostic. Native modules and tooling work with any Lynx binding, including [miso-lynx](https://lynxjs.haskell-miso.org/) and [VueLynx](https://vue.lynxjs.org/) (`@lynx-js/vue`). Some packages like **tamer-router** are specifically designed for `@lynx-js/react`.
+
+
+
+---
+url: /guide/index.md
+---
+
+# Guide
+
+## What you are looking at
+
+**Lynx** is the cross-platform rendering engine and JS runtime ([docs](https://lynxjs.org/)). You write a Lynx app (often with **ReactLynx** and **Rspeedy**).
+
+**Tamer4Lynx** is the layer _around_ that app for real products: a **CLI** (`t4l` from `@tamer4lynx/cli`) plus **npm packages** (`@tamer4lynx/*`) that add routing, native shell UI, networking helpers, auth, secure storage, deep links, and more — with **iOS and Android host projects** generated or linked by the CLI. **HarmonyOS** support is coming soon.
+
+If you only remember three things:
+
+1. Run **`t4l init`** where `tamer.config.json` should live. It can create a Lynx app, detect root/nested apps, install selected Tamer packages, and configure workspaces.
+2. Add or update Tamer packages with the CLI (`t4l add`, `t4l add-core`, or `t4l add-dev`) when needed, not raw `npm install …@latest`, so versions match npm’s default installable line; then **`t4l link`**.
+3. Use **[Getting Started](/guide/getting-started.md)** for the full flow (dev server, debug builds, when to run `t4l signing`).
+
+## Where to read next
+
+| Topic                                     | Page                                                                                                                                                                          |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| End-to-end setup                          | [Getting Started](/guide/getting-started.md) — CLI, `t4l init`, `t4l start`, builds                                                                                           |
+| `tamer.config.json`, autolink, extensions | [Configuration](/guide/configuration.md)                                                                                                                                      |
+| How the monorepo example wires packages   | [Example Anatomy](/guide/example-anatomy.md)                                                                                                                                  |
+| Every `t4l` subcommand                    | [Commands](/reference/commands.md)                                                                                                                                            |
+| Package list by category                  | [Packages](/packages/index.md) → [Core](/packages/core/index.md), [UI](/packages/ui/index.md), [Platform](/packages/platform/index.md), [Tooling](/packages/tooling/index.md) |
+
+## Lynx ecosystem
+
+[Lynx](https://lynxjs.org/) · [Rspeedy](https://lynxjs.org/rspeedy/) · [ReactLynx](https://lynxjs.org/react/)
+
+
+
+---
+url: /guide/native-modules.md
+---
+
+# Native Modules & Elements
+
+Tamer wraps Lynx's native module / custom element APIs with autolinking (`tamer.config.json` + `t4l link`) so consumers don't manually edit Gradle / Podfile. This page shows how to author a Tamer-compatible native package: a JS-callable native module, a custom UI element, and an optional build-time plugin via `tamer.config.ts`.
+
+For the underlying Lynx APIs, see the upstream guides:
+
+- [Lynx — Use Native Modules](https://lynxjs.org/guide/use-native-modules.html)
+- [Lynx — Custom Native Component](https://lynxjs.org/guide/custom-native-component.html)
+
+## Package layout
+
+A typical Tamer native package mirrors `tamer-icons` / `tamer-linking`:
+
+```
+my-package/
+├── package.json
+├── tamer.config.ts          # optional — bundler plugin (see below)
+├── lynx.ext.json            # autolink hint
+├── src/                     # JS surface (TS compiled to dist/)
+├── android/
+│   ├── build.gradle.kts
+│   └── src/main/kotlin/com/yourorg/mypackage/MyModule.kt
+└── ios/
+    └── mypackage/
+        ├── mypackage.podspec
+        └── mypackage/Classes/MyModule.swift
+```
+
+After `t4l add my-package` + `t4l link`, the consumer's iOS Podfile picks up the podspec and the consumer's Android Gradle picks up `:my-package`. No manual wiring.
+
+## Native modules (JS-callable functions)
+
+A native module exposes synchronous or callback-style methods to JS via `NativeModules.MyModule`. Tamer doesn't add anything new on top of Lynx — register your `LynxModule` class and the autolinker handles registration.
+
+![](/assets/icon-ios.svg)iOS (Swift)![](/assets/icon-android.svg)Android (Kotlin)`ios/mypackage/mypackage/Classes/MyModule.swift`:
+```swift
+import Foundation
+import Lynx
+
+@objcMembers
+public final class MyModule: NSObject, LynxModule {
+    @objc public static var name: String { "MyModule" }
+
+    @objc public static var methodLookup: [String: String] {
+        [
+            "ping": NSStringFromSelector(#selector(ping(_:))),
+        ]
+    }
+
+    @objc public override init() { super.init() }
+    @objc public init(param: Any) { super.init() }
+
+    @objc func ping(_ callback: @escaping (String) -> Void) {
+        callback("pong")
+    }
+}
+```
+
+JS surface (`src/index.ts`):
+
+```ts
+declare const NativeModules: {
+  MyModule?: { ping(cb: (msg: string) => void): void }
+}
+
+export function ping(): Promise<string> {
+  return new Promise((resolve) => {
+    const mod = NativeModules?.MyModule
+    if (!mod?.ping) return resolve('')
+    mod.ping((msg) => resolve(msg))
+  })
+}
+```
+
+In a consumer Lynx component:
+
+```tsx
+import { ping } from '@yourorg/my-package'
+
+useEffect(() => {
+  ping().then((msg) => console.log(msg)) // "pong"
+}, [])
+```
+
+## Custom elements (native UI primitives)
+
+Custom elements register a JSX intrinsic backed by a native view (Android `LynxUI<T>`, iOS `LynxUI` subclass). Useful when CSS/Lynx-built-ins can't render what you need — icon glyphs, native maps, camera previews, charts.
+
+![](/assets/icon-ios.svg)iOS (Obj-C)![](/assets/icon-android.svg)Android (Kotlin)Loosely modeled on `tamer-icons/ios/.../TamerIconElement.m`:
+```objc
+#import "MyBadgeElement.h"
+#import <Lynx/LynxPropsProcessor.h>
+
+@interface MyBadgeHostView : UIView
+@property(nonatomic, strong) UILabel *label;
+@end
+
+@implementation MyBadgeHostView
+- (instancetype)init {
+  if ((self = [super initWithFrame:CGRectZero])) {
+    _label = [UILabel new];
+    _label.textAlignment = NSTextAlignmentCenter;
+    [self addSubview:_label];
+  }
+  return self;
+}
+- (void)layoutSubviews { [super layoutSubviews]; self.label.frame = self.bounds; }
+@end
+
+@implementation MyBadgeElement
+- (UIView *)createView { return [MyBadgeHostView new]; }
+
+LYNX_PROP_SETTER("text", setText, NSString *) {
+  ((MyBadgeHostView *)self.view).label.text = value ?: @"";
+}
+@end
+```
+
+Augment the JSX namespace so consumers get autocomplete (`src/jsx.ts`):
+
+```ts
+/// <reference types="@lynx-js/types" />
+import type { ViewProps } from '@lynx-js/types'
+
+export type MyBadgeProps = { text: string } & ViewProps
+
+declare module '@lynx-js/types' {
+  interface IntrinsicElements {
+    'my-badge': MyBadgeProps
+  }
+}
+```
+
+Consumer:
+
+```tsx
+<my-badge text="42" style={{ width: '40px', height: '40px' }} />
+```
+
+## Build-time plugin via `tamer.config.ts`
+
+Some packages need to participate in the **consumer's bundler** — fetch fonts, generate routes, inject `define`s, copy assets. Ship an rsbuild plugin from your package and re-export it from `tamer.config.ts`. Tamer's plugin loader picks it up when the consumer imports your package.
+
+Real example — `packages/tamer-icons/src/plugin.ts` downloads Material Icons + Font Awesome on first build, caches them, and copies them into the consumer's `fonts/` directory:
+
+```ts
+import fs from 'fs'
+import path from 'path'
+import type { RsbuildPlugin } from '@rsbuild/core'
+import { MATERIAL_ICONS_URL, FONTAWESOME_SOLID_URL } from './fonts'
+
+async function fetchToBuffer(url: string): Promise<Buffer> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`)
+  return Buffer.from(await res.arrayBuffer())
+}
+
+async function ensureFonts(pkgDir: string): Promise<void> {
+  const fontsDir = path.join(pkgDir, 'fonts')
+  fs.mkdirSync(fontsDir, { recursive: true })
+  const cacheDir = path.join(pkgDir, '.cache', 'tamer-icons')
+  fs.mkdirSync(cacheDir, { recursive: true })
+
+  const materialPath = path.join(fontsDir, 'MaterialSymbolsOutlined.ttf')
+  const materialCache = path.join(cacheDir, 'MaterialSymbolsOutlined.ttf')
+  if (!fs.existsSync(materialCache)) {
+    fs.writeFileSync(materialCache, await fetchToBuffer(MATERIAL_ICONS_URL))
+  }
+  fs.copyFileSync(materialCache, materialPath)
+  // ...repeat for other fonts
+}
+
+export function pluginTamerIcons(): RsbuildPlugin {
+  return {
+    name: 'tamer-icons',
+    async setup(api) {
+      const pkgDir = path.resolve(__dirname, '..')
+      if (fs.existsSync(path.join(pkgDir, 'package.json'))) {
+        await ensureFonts(pkgDir)
+      }
+    },
+  }
+}
+```
+
+Key design notes:
+
+- **Cache before fetch.** First build downloads, subsequent builds copy from cache. Offline builds keep working.
+- **Run side effects in `setup`.** rsbuild calls it once per build; safe place for IO.
+- **No mutation of consumer source.** Write into your own package directory or use `api.transform` / `api.modifyRsbuildConfig` instead of editing arbitrary files.
+
+## Wiring through `tamer.config.json`
+
+The consumer adds your package; autolinking handles native registration. JS-side bundler integration goes through `tamer.config.ts`:
+
+```ts
+// consumer-app/tamer.config.ts
+import { pluginTamerIcons } from '@tamer4lynx/tamer-icons/plugin'
+
+export default {
+  plugins: [pluginTamerIcons()],
+}
+```
+
+The Tamer CLI loads `tamer.config.ts` (if present) and passes the plugin list through to rspeedy/rsbuild.
+
+## See also
+
+- [tamer-plugin](/packages/core/tamer-plugin.md) — the Tamer-side plugin machinery that picks up `tamer.config.ts`
+- [Configuration](/guide/configuration.md) — full config schema
+- [Lynx — Use Native Modules](https://lynxjs.org/guide/use-native-modules.html)
+- [Lynx — Custom Native Component](https://lynxjs.org/guide/custom-native-component.html)
+
+
+
+---
+url: /reference/commands.md
+---
+
+# CLI Commands Reference
+
+Commands use the form **`t4l <command> [target] [flags]`**. Target is a platform (`ios`, `android`) or, for create, an extension type (`module`, `element`, `service`, `combo`). All flags support both short and long form (e.g. `-d` or `--debug`).
+
+***
+
+## Global
+
+On startup `t4l` loads `.env` then `.env.local` from the directory containing `tamer.config.json` (walking up from the current working directory). Values are applied only when the variable is **not** already set in the process environment — so CI or shell exports always win.
+
+**Android signing** (referenced in `tamer.config.json`):
+
+```bash
+ANDROID_KEYSTORE_PATH=android/release.keystore
+ANDROID_KEYSTORE_PASSWORD=...
+ANDROID_KEY_ALIAS=release
+ANDROID_KEY_PASSWORD=...
+```
+
+**App Store Connect API** (used with `t4l build ios -p --ipa`):
+
+```bash
+APP_STORE_CONNECT_API_KEY_PATH=/path/to/AuthKey.p8
+APP_STORE_CONNECT_API_KEY_ID=XXXXXXXXXX
+APP_STORE_CONNECT_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+Optional overrides for those variable names live under `ios.appStoreConnect` in `tamer.config.json`. When all three App Store Connect vars are set, the CLI runs `xcodebuild archive` + `-exportArchive` with **app-store** export (distribution signing + API key auth) instead of zipping a locally signed `.app`.
+
+| Command                  | Description                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `t4l` or `t4l init`      | Interactive setup: detects or creates a Lynx app, installs selected Tamer packages, and writes `tamer.config.json` |
+| `t4l add …`              | Add `@tamer4lynx/*` to the Lynx project — details below                                                            |
+| `t4l add-core`           | Install the core stack in one command — details below                                                              |
+| `t4l add-dev`            | Install dev-client and its dependencies — details below                                                            |
+| `t4l update`             | Bump every `@tamer4lynx/*` listed in **package.json** to npm’s default installable version — details below         |
+| `t4l signing [platform]` | Configure Android/iOS signing (interactive; Android can generate a keystore with `keytool`)                        |
+| `t4l --help`             | Show help                                                                                                          |
+| `t4l --version`          | Show version                                                                                                       |
+
+### Developing the CLI (this repository)
+
+Do not run `node index.ts` — Node ESM does not resolve extensionless `./src/...` imports. From the repo root: `npm run cli -- <args>` (runs `tsx index.ts`), or `npm run build && node dist/index.js <args>`.
+
+***
+
+## `t4l init`
+
+Bootstrap or configure a Tamer project with an **Ink** interactive wizard. It detects a root or nested Lynx app (`lynx.config.*` or `@lynx-js/rspeedy`), creates a starter when none exists, normalizes nested apps into a root workspace, installs dependencies from the root, writes `tamer.config.json`, injects `pluginTamer()` into `lynx.config.*` when possible, and syncs TypeScript component types. By default the iOS app name and bundle ID reuse the Android app name and package ID unless iOS customization is selected.
+
+Default starter: **Rspeedy React TypeScript + Biome**. New project names are derived from the root folder name; the default native ID is `com.<project_name>` after identifier sanitization. Existing nested apps are written as `lynxProject: "<dir>"`; root apps omit `lynxProject`.
+
+| Flag                    | Description                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `--template <template>` | Starter: `rspeedy` or `vue-lynx`                                                           |
+| `--dir <path>`          | Lynx app directory. Use `.` for root layout                                                |
+| `--install <stack>`     | Tamer packages: `core`, `dev`, or `none`                                                   |
+| `--pm <pm>`             | Package manager: `npm`, `pnpm`, or `bun`                                                   |
+| `-y`, `--yes`           | Accept defaults: Rspeedy React TypeScript + Biome, detected package manager, core packages |
+
+For **TypeScript**, when a `tsconfig.json` exists (project root or under `lynxProject`), `init` may **flatten project references** (TS6310), then generate **`.tamer/tamer-components.d.ts`** and ensure `include` for that file. Broad globs such as `node_modules/@tamer4lynx/tamer-*/src/**/*.d.ts` are removed when present.
+
+***
+
+## `t4l signing [platform]`
+
+Configure Android and iOS release signing in `tamer.config.json` (Ink interactive wizard).
+
+| Argument  | Description                  |
+| --------- | ---------------------------- |
+| _(none)_  | Choose Android, iOS, or both |
+| `android` | Android only                 |
+| `ios`     | iOS only                     |
+
+**Android:** Choose **Generate a new release keystore** (requires a JDK: `keytool` on `PATH` or `JAVA_HOME`) or **Use an existing keystore**. Generation runs `keytool -genkeypair` (RSA 2048, 10000-day validity) and writes the keystore under a path you choose (default `android/release.keystore`). Passwords are referenced by env var names in `tamer.config.json`; on **generate**, the wizard **appends** `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_PASSWORD` (or names you choose) to **`.env.local`** if it exists, else **`.env`** if that file exists, else it creates **`.env.local`**—each new line only; existing keys are not overwritten. The CLI loads **`.env`** then **`.env.local`** at startup (see Global). Gradle can still use an optional `android/signing.properties` if you maintain it yourself; the wizard does not write it.
+
+**iOS:** Prompts for Development Team ID and optional code-sign identity / provisioning profile specifier.
+
+After setup, use `t4l build android -p` / `t4l build ios -p` for production signed builds.
+
+***
+
+## `t4l create <target>`
+
+Create a project or extension. **Target:** `ios` | `android` | `module` | `element` | `service` | `combo`.
+
+| Target    | Description                                                    |
+| --------- | -------------------------------------------------------------- |
+| `ios`     | Create iOS project                                             |
+| `android` | Create Android project (host by default; use `-r` for dev-app) |
+| `module`  | Create Lynx extension with native module only                  |
+| `element` | Create Lynx extension with custom element (JSX preserved)      |
+| `service` | Create Lynx extension with service only                        |
+| `combo`   | Create Lynx extension with module + element + service          |
+
+| Flag        | Short | Description                               |
+| ----------- | ----- | ----------------------------------------- |
+| `--release` | `-r`  | Android: create a release-variant project |
+
+**Examples:**
+
+```bash
+t4l create ios
+t4l create android
+t4l create android -r
+t4l create module
+t4l create element
+t4l create combo
+```
+
+***
+
+## `t4l build <platform>`
+
+Build your app. **Platform is required:** `ios` | `android` (one platform per command). With **debug** (`-d`), the dev client (QR scan, HMR) is embedded when `@tamer4lynx/tamer-dev-client` is installed; with **release** (`-r`), the build has no dev client (unsigned); with **production** (`-p`), the build is signed for app store.
+
+**Production (`-p`):** Configure signing first (`t4l signing`, or `t4l signing android` / `t4l signing ios`). If signing is not set up for that platform, the CLI exits with instructions. To build both platforms, run `t4l build android -p` and `t4l build ios -p` separately.
+
+**iOS `-r` / `-p` vs dev-client:** Release/production builds **do not** build or copy `dev-client.lynx.bundle` and use the plain host `ViewController` (main bundle only). You may still see `@tamer4lynx/tamer-dev-client` in the autolinker’s package list because it provides native iOS pods; that is not the same as embedding the dev-client Lynx shell.
+
+**Lynx DevTool:** Debug (`-d`) hosts with `tamer-dev-client` register native DevTool hooks so you can attach the [desktop Lynx DevTool](https://lynxjs.org/guide/devtool.md) over USB. **`-r` / `-p` builds do not enable DevTool** (iOS: `#if DEBUG` only; Android: debug classpath / no-op in release).
+
+**iOS `-p` and `-i`:** Production (`-p`) always builds for **real devices** (`iphoneos`) with code signing enabled (configure via `t4l signing ios`). Signing settings from `tamer.config.json` are passed to `xcodebuild`. With `-i`, the CLI installs using `xcrun devicectl device install app --device <UDID>` (Xcode 15+). If **multiple** physical devices are connected, an interactive **device picker** runs; with **one** device, install proceeds without a prompt. Debug (`-d`) with `-i` still targets the **simulator** (`simctl install`).
+
+**Android `-i`:** Install uses Gradle `install*` with `ANDROID_SERIAL` set when you pick a device, or a single connected device. If **multiple** `adb` devices are connected, an interactive **device picker** runs; with **one** device, install proceeds without a prompt. Launch uses `adb -s <serial> shell am start …`.
+
+**iOS `--ipa`:** With `t4l build ios -p` (and optionally `-i`), **`--ipa`** produces an IPA under `ios/build/ipa-export/`. **Without** App Store Connect env vars (see Global): unsigned build, manual `codesign`, then zip into `Payload` (manual path). **With** `APP_STORE_CONNECT_API_KEY_PATH`, `APP_STORE_CONNECT_API_KEY_ID`, and `APP_STORE_CONNECT_ISSUER_ID` set (and `ios.signing.developmentTeam`), the CLI uses **`xcodebuild archive`** + **`-exportArchive`** with method **app-store** and your `.p8` API key. Use `-p`; `--ipa` alone is invalid.
+
+**Non-interactive CI:** If multiple devices are connected and stdin is not a TTY, install fails with a message to connect a single device.
+
+| Flag           | Short | Default | Description                                                                                                                                                                                                                                                                                   |
+| -------------- | ----- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--embeddable` | `-e`  | —       | Output to `embeddable/` for adding LynxView to an existing app. **Requires** `t4l build android --embeddable` (Android only). Runs a **release-style** embeddable build internally; you do **not** need to pass `--release`. When `-e` is present, the CLI only performs the embeddable step. |
+| `--debug`      | `-d`  | default | Debug build with dev client embedded (if tamer-dev-client is installed).                                                                                                                                                                                                                      |
+| `--release`    | `-r`  | —       | Release build without dev client (unsigned).                                                                                                                                                                                                                                                  |
+| `--production` | `-p`  | —       | Production build for app store (signed).                                                                                                                                                                                                                                                      |
+| `--install`    | `-i`  | —       | **Android:** install APK to device. **iOS:** with **debug** (`-d`), install to the **booted simulator**; with **production** (`-p`), install to a **physical device only** via `devicectl` (simulator is never used with `-p`).                                                               |
+| `--ipa`        | —     | —       | **iOS only** (`t4l build ios -p`): archive and export a signed IPA after the production build.                                                                                                                                                                                                |
+| `--clean`      | `-C`  | —       | **Android only:** run Gradle `clean` before building (helps with stubborn caches). No effect on iOS-only builds.                                                                                                                                                                              |
+
+**Examples:**
+
+```bash
+t4l build android
+t4l build android -i
+t4l build ios -r
+t4l build android --release --install
+t4l build android -C
+t4l build ios -p -i
+t4l build ios -p --ipa
+t4l build android --embeddable
+```
+
+***
+
+## `t4l link [platform]`
+
+Link native modules to the project and sync native dependencies. **Platform:** `ios` | `android` | `both` (optional; default `both`).
+
+- **iOS:** Updates Podfile and `LynxInitProcessor.swift` (imports, module registrations, `DevClientModule.attachSupportedModuleClassNames`), then runs **`pod install`** in the `ios` directory. If `@tamer4lynx/tamer-dev-client` is installed, also writes **`tamer-host-native-modules.json`** into `ios/<AppName>/` (lists JVM-style `moduleClassName` values matching dev server `meta.json`) and registers it in the Xcode project’s **Copy Bundle Resources**.
+- **Android:** Updates settings.gradle.kts, app/build.gradle.kts, and generated code, then runs **Gradle sync** (`./gradlew projects`) in the `android` directory.
+- **TypeScript / IDE:** When **`syncTamerComponentTypes`** is not `false` in `tamer.config.json`, each platform’s autolink step also regenerates **`.tamer/tamer-components.d.ts`** and ensures **`tsconfig.json`** includes it (see [Ambient types](/packages/tooling/tamer-ambient-types.md)).
+
+| Flag       | Short | Description                                               |
+| ---------- | ----- | --------------------------------------------------------- |
+| `--silent` | `-s`  | Run without output. Useful for CI or postinstall scripts. |
+
+**Examples:**
+
+```bash
+t4l link
+t4l link android
+t4l link --silent
+```
+
+**Host apps (`tamer-dev-app`, projects created with `t4l ios create`):** `LynxInitProcessor.swift` from **tamer-dev-client** templates only contains `GENERATED IMPORTS` / `GENERATED AUTOLINK` placeholders. Run `t4l link` from the app root (where `tamer.config.json` lives) so those sections are filled from your `node_modules` `@tamer4lynx/*` packages. In the monorepo, `packages/tamer-dev-app` provides `npm run link:native` after building the CLI (`npm run build` at repo root).
+
+**User-provided native modules:** To ensure your custom native extensions are discovered and linked:
+
+1. Install the package in your workspace root `package.json` (or ensure it's hoisted to the root `node_modules` in monorepos).
+2. The package must include `lynx.ext.json` or `tamer.json` with `ios` and/or `android` configuration.
+3. Run `t4l link` after adding dependencies to update Podfile/Gradle and native registration code.
+4. For iOS, run `pod install` in the `ios/` directory after podspec changes.
+
+**iOS `No podspec found` for a Tamer package:** Often the app depended on **`npm install …@latest`**, where **`latest`** points at an older tarball without `ios/`. Prefer **`t4l add tamer-insets`** (or the relevant package): it resolves the default installable npm version for the package and falls back only if `latest` is missing. Then run **`t4l link ios`** again.
+
+**Xcode reports unknown UUID in `project.pbxproj`:** This can occur after merge conflicts or if the project file was manually edited. Fix by reverting `ios/<AppName>.xcodeproj/project.pbxproj` from git and re-running `t4l bundle ios` or `t4l link ios` to regenerate resource references.
+
+***
+
+## `t4l bundle [platform]`
+
+Build the Lynx bundle and copy it to the native project. **Platform:** `ios` | `android` (optional; omit for both). Runs **autolink** before bundling (iOS: includes `tamer-host-native-modules.json` when dev-client is present — see `t4l link`).
+
+| Flag           | Short | Default | Description                                        |
+| -------------- | ----- | ------- | -------------------------------------------------- |
+| `--debug`      | `-d`  | default | Debug bundle with dev client embedded (if present) |
+| `--release`    | `-r`  | —       | Release bundle without dev client (unsigned)       |
+| `--production` | `-p`  | —       | Production bundle for app store (signed)           |
+
+***
+
+## `t4l inject <platform>`
+
+Inject tamer-host templates into an existing project. **Platform:** `ios` | `android` (required).
+
+| Flag      | Short | Description                                                         |
+| --------- | ----- | ------------------------------------------------------------------- |
+| `--force` | `-f`  | Overwrite existing files. Without this, existing files are skipped. |
+
+**Examples:**
+
+```bash
+t4l inject android
+t4l inject ios -f
+```
+
+***
+
+## `t4l sync [platform]`
+
+Sync dev client files (TemplateProvider, MainActivity, DevClientManager) from `tamer.config.json`. **Platform:** `android` only (default).
+
+**Note:** This runs automatically during `t4l bundle` and `t4l build`. Use it manually when you've changed `tamer.config.json` (e.g., `devServer.host` or `devServer.port`) and want to update the generated Android files without building or bundling.
+
+**Examples:**
+
+```bash
+t4l sync
+t4l sync android
+```
+
+***
+
+## `t4l start`
+
+Start the dev server with HMR and WebSocket support (Expo-like). Prints bundle URLs, `meta.json`, QR code, and WebSocket endpoint.
+
+If the configured/default port is busy, `t4l start` tries the next port numbers until it binds successfully. The dashboard shows both the active port and a warning that the configured/default port was unavailable for this session.
+
+**Multiple bundles:** set `paths.lynxAdditionalBundles` in `tamer.config.json` to an array of extra `.lynx.bundle` filenames under the same `paths.lynxBundleRoot` as `paths.lynxBundleFile`. Each is listed under `bundles` in `meta.json` and served from the dev server alongside the primary bundle.
+
+**Keyboard shortcuts** (stdin, TTY): **`r`** rebuild, **`c`** / **Ctrl+L** clear screen, **Ctrl+C** exit.
+
+| Flag        | Short | Description                                         |
+| ----------- | ----- | --------------------------------------------------- |
+| `--verbose` | `-v`  | Show all logs (native + JS). Default shows JS only. |
+
+***
+
+## `t4l add [packages...]`
+
+Add `@tamer4lynx` packages to the Lynx project.
+
+| Argument      | Description                                                                                        |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| `packages...` | Package names (e.g. `tamer-auth`, `@tamer4lynx/tamer-auth`). Bare names get `@tamer4lynx/` prefix. |
+
+**Examples:**
+
+```bash
+t4l add tamer-auth
+t4l add @tamer4lynx/tamer-auth @tamer4lynx/tamer-secure-store
+```
+
+***
+
+## `t4l add-core`
+
+Adds the core stack: **tamer-app-shell**, **tamer-screen**, **tamer-router**, **tamer-insets**, **tamer-transports**, **tamer-system-ui**, **tamer-icons**, **tamer-env** (Rspeedy `.env` plugin). Each package is resolved to npm’s default installable version (same as `t4l add` / `t4l add-dev`). No flags.
+
+***
+
+## `t4l add-dev`
+
+Adds the **dev stack**: **tamer-dev-client**, **tamer-linking**, and the `@tamer4lynx/*` packages they need (**app-shell**, **icons**, **insets**, **plugin**, **router**, **screen**, **system-ui**). Each is resolved to npm’s default installable version (same idea as `add-core` / `t4l add`). No flags.
+
+***
+
+## `t4l update`
+
+Scans **`dependencies`**, **`devDependencies`**, **`peerDependencies`**, and **`optionalDependencies`** in the Lynx project’s **package.json** for **`@tamer4lynx/*`** names and re-installs each at npm’s default installable version (same resolution as `t4l add`). Skips **`file:`**, **`link:`**, **`portal:`**, and **`workspace:`** specs so local / monorepo links stay unchanged. If nothing matches, add packages first with **`t4l add`** / **`add-core`** / **`add-dev`**. No flags.
+
+If npm reports **`ETARGET`** for **`@tamer4lynx/...@^0.0.n`**, remember that **`^` on 0.0.x** only allows the same patch line (e.g. **`^0.0.3`** is **`<0.0.4`**). A transitive dependency may still pin an older range; published **`@tamer4lynx/*`** packages use **`>=0.0.1`**-style ranges for internal deps so newer **0.0.x** releases stay compatible.
+
+***
+
+**After `t4l add`, `t4l add-core`, `t4l add-dev`, or `t4l update`:** run **`t4l link`** so native modules are wired into iOS/Android.
+
+***
+
+## `t4l codegen`
+
+Generate code from `@lynxmodule` declarations in `.d.ts` files. Run from an extension package root.
+
+No flags.
+
+***
+
+## `t4l autolink-toggle` / `t4l autolink`
+
+Toggle `autolink` on/off in `tamer.config.json`. When enabled, `t4l link` runs after **installing dependencies** (e.g. `postinstall` after `npm install` / `pnpm install` / `bun install`). Does not affect build or bundle commands, which always run link.
+
+No flags.
+
+***
+
+## Platform-first commands
+
+The following form works: **`t4l <platform> <subcommand> [flags]`**.
+
+| Command              | Description                                                               |
+| -------------------- | ------------------------------------------------------------------------- |
+| `t4l android create` | Same as `t4l create android`. Use `-r` / `--release` for release variant. |
+| `t4l android link`   | Same as `t4l link android`                                                |
+| `t4l android bundle` | Same as `t4l bundle android`. Flags: `-d`, `-r`, `-p`.                    |
+| `t4l android build`  | Same as `t4l build android`. Flags: `-d`, `-r`, `-p`, `-i`, `-e`, `-C`.   |
+| `t4l android sync`   | Same as `t4l sync android`                                                |
+| `t4l android inject` | Same as `t4l inject android`. Flag: `-f`.                                 |
+| `t4l ios create`     | Same as `t4l create ios`                                                  |
+| `t4l ios link`       | Same as `t4l link ios`                                                    |
+| `t4l ios bundle`     | Same as `t4l bundle ios`. Flags: `-d`, `-r`, `-p`.                        |
+| `t4l ios build`      | Same as `t4l build ios`. Flags: `-d`, `-r`, `-p`, `-i`, `--ipa`, `-e`.    |
+| `t4l ios inject`     | Same as `t4l inject ios`. Flag: `-f`.                                     |
+
+**Note:** Use `t4l link ios` or `t4l link android` (not `--ios` / `--android`).
+
+
+
+---
+url: /reference/index.md
+---
+
+# Reference
+
+Technical reference for the Tamer4Lynx CLI and related tooling.
+
+- [CLI commands](/reference/commands.md) — Full `t4l` command reference (init, build, link, add, signing, and platform-specific flows).
+
+
+
+---
+url: /packages/core/index.md
+---
+
+# Core packages
+
+Routing, dev tooling, host templates, Rsbuild integration, and app shell primitives used across most Tamer apps.
+
+| Package                                                | Role                                                                                                                                  |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [tamer-dev-client](/packages/core/tamer-dev-client.md) | Dev launcher (QR, HMR, recent servers, compatibility checks)                                                                          |
+| [tamer-host](/packages/core/tamer-host.md)             | Lynx host templates — usually auto-installed by `t4l create`; add manually only for existing projects                                 |
+| [tamer-navigation](/packages/core/tamer-navigation.md) | Native stack transport (`TamerNav` push/pop/dispatch) — the foundation `tamer-router` builds on; use directly for custom coordinators |
+| [tamer-router](/packages/core/tamer-router.md)         | File-based routing, Stack/Tabs, system back hooks, cross-spoke state bridge                                                           |
+| [tamer-plugin](/packages/core/tamer-plugin.md)         | Rsbuild plugin merging `tamer.config`                                                                                                 |
+| [tamer-app-shell](/packages/core/tamer-app-shell.md)   | AppBar, TabBar, Content, navigation chrome                                                                                            |
+
+**`t4l add-core`** installs everything needed for a production app: host templates, plugin, navigation, router, app-shell, screen, insets, system-ui, icons, transports, and env. **`t4l add-dev`** is a superset that also adds the dev launcher packages needed in an app (`tamer-dev-client`, `tamer-linking`).
+
+
+
+---
+url: /packages/core/tamer-app-shell.md
+---
+
+# tamer-app-shell
+
+App chrome (AppBar / TabBar / Screen / SafeArea) plus a Material 3 component set (Button, Card, FAB, NavigationDrawer, NavigationRail, …) for Lynx. Used by tamer-router `Stack` / `Tab` layouts and standalone in any Lynx page.
+
+## Install
+
+```bash
+t4l add-core
+# or: t4l add tamer-app-shell tamer-icons tamer-insets tamer-screen
+```
+
+Run **`t4l link`** after installing.
+
+## Usage
+
+Each export drops in directly — most pages need only a few. Imports first:
+
+```tsx
+import {
+  AppBar,
+  TabBar,
+  Screen,
+  SafeArea,
+  Button,
+  ButtonGroup,
+  Card,
+  Fab,
+  ExtendedFab,
+  FabMenu,
+  FloatingFabContainer,
+  NavigationDrawer,
+  NavigationRail,
+  ScreenScopedOverlay,
+  SCREEN_OVERLAY_LEVEL_DRAWER,
+  SCREEN_OVERLAY_LEVEL_FLOATING,
+  useM3ThemeTokens,
+} from '@tamer4lynx/tamer-app-shell'
+```
+
+### Button
+
+```tsx
+<Button variant="outlined" icon="add" size="md" onTap={...}>New</Button>
+```
+
+`variant`: `'filled'` (default) | `'outlined'` | `'text'` | `'elevated'` | `'tonal'`\
+`size`: `'xs'` | `'sm'` | `'md'` (default) | `'lg'` | `'xl'`\
+`shape`: `'round'` (default) | `'square'`
+
+### ButtonGroup
+
+```tsx
+<ButtonGroup
+  items={[
+    { id: 'left',  label: 'Left'   },
+    { id: 'mid',   label: 'Middle' },
+    { id: 'right', label: 'Right'  },
+  ]}
+  selectedId={selected}
+  onSelect={setSelected}
+/>
+```
+
+### Card
+
+```tsx
+<Card variant="elevated">{...children}</Card>
+```
+
+`variant`: `'elevated'` (default) | `'filled'` | `'outlined'`
+
+### Fab
+
+```tsx
+<Fab icon="add" size="regular" onTap={...} />
+```
+
+`size`: `'small'` | `'regular'` (default) | `'large'`
+
+### ExtendedFab
+
+```tsx
+<ExtendedFab icon="edit" onTap={...}>Compose</ExtendedFab>
+```
+
+### FabMenu
+
+```tsx
+<FabMenu
+  items={[
+    { id: 'a', icon: 'image', label: 'Photo', onTap: () => {} },
+    { id: 'b', icon: 'mic',   label: 'Voice', onTap: () => {} },
+  ]}
+/>
+```
+
+### FloatingFabContainer
+
+```tsx
+<FloatingFabContainer>
+  <Fab icon="add" onTap={...} />
+</FloatingFabContainer>
+```
+
+### NavigationDrawer
+
+```tsx
+<NavigationDrawer
+  open={open}
+  onDismiss={() => setOpen(false)}
+  sections={[
+    {
+      header: 'Mail',
+      items: [
+        { id: 'inbox', icon: 'inbox', label: 'Inbox' },
+        { id: 'sent',  icon: 'send',  label: 'Sent'  },
+      ],
+    },
+  ]}
+  selectedId={selected}
+  onSelect={setSelected}
+/>
+```
+
+### NavigationRail
+
+```tsx
+<NavigationRail
+  items={[
+    { id: 'home',  icon: 'home' },
+    { id: 'fav',   icon: 'star' },
+    { id: 'about', icon: 'info' },
+  ]}
+  selectedId={selected}
+  onSelect={setSelected}
+/>
+```
+
+### ScreenScopedOverlay
+
+```tsx
+<ScreenScopedOverlay level={SCREEN_OVERLAY_LEVEL_DRAWER} visible={open}>
+  ...overlay content...
+</ScreenScopedOverlay>
+```
+
+`level`: `SCREEN_OVERLAY_LEVEL_FLOATING` (10) for menus/FABs, `SCREEN_OVERLAY_LEVEL_DRAWER` (20) for drawers.
+
+### Theme tokens
+
+```tsx
+const t = useM3ThemeTokens()
+
+<view style={{ backgroundColor: t.surface, borderColor: t.outlineVariant }}>
+  <text style={{ color: t.onSurface }}>Hi</text>
+</view>
+```
+
+The token set tracks the active light / dark palette from [tamer-system-ui](/packages/ui/tamer-system-ui.md), so theme switches propagate without per-component plumbing.
+
+The `packages/example` app at `pages/m3/` exercises every component above — see [Example Anatomy](/guide/example-anatomy.md).
+
+## API
+
+### App chrome
+
+#### `<AppBar>`
+
+```tsx
+<AppBar
+  title?: string
+  barHeight?: number
+  leftAction?: AppBarAction | false
+  rightActions?: AppBarAction[]
+  foregroundColor?: string
+  actionColor?: string
+  style?: ViewProps['style']
+/>
+```
+
+`AppBarAction`: `{ icon: string; set?: IconSet; onTap: () => void }`. If `leftAction` is undefined and `canGoBack()`, shows the default back button.
+
+#### `<TabBar>`
+
+```tsx
+<TabBar
+  tabs={TabItem[]}
+  iconColor?: { active?: string; inactive?: string }
+  style?: ViewProps['style']
+/>
+```
+
+`TabItem`: `{ icon: string; set?: IconSet; label?: string; path?: string; onTap?: () => void }`. Uses `AppShellRouterContext.replace(path, { tab: true })` when `path` is set.
+
+#### `<Content>`
+
+Scrollable view. Accepts `children` and optional `style`.
+
+#### `<Screen>` / `<SafeArea>`
+
+Re-exported from [tamer-screen](/packages/ui/tamer-screen.md). `Screen` is a full-screen flex column. `SafeArea` accepts `edges?: ('top'|'right'|'bottom'|'left')[]` plus `children`.
+
+#### `<AppShellProvider>` / `useAppShellContext()`
+
+```tsx
+<AppShellProvider showAppBar showTabBar barHeight?>{children}</AppShellProvider>
+```
+
+`useAppShellContext()` returns `{ showAppBar, showTabBar, barHeight }`.
+
+#### `useAppShellRouter()`
+
+Returns `AppShellRouterContextValue | null`: `back`, `canGoBack`, `replace(route, options?)`. Provided by `FileRouter`; usable directly with manual coordinators.
+
+### Material 3 components
+
+#### `<Button>`
+
+```tsx
+<Button
+  variant?: 'filled' | 'outlined' | 'text' | 'elevated' | 'tonal'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  shape?: 'round' | 'square'
+  icon?: string
+  iconSet?: IconSet
+  onTap?: () => void
+  disabled?: boolean
+>
+  Label
+</Button>
+```
+
+#### `<ButtonGroup>`
+
+`ButtonGroupProps` accepts `items: ButtonGroupItem[]`, `selectedId`, `onSelect`. Connected button row.
+
+#### `<Card variant>`
+
+`'elevated' | 'filled' | 'outlined'`.
+
+#### `<Fab>` / `<ExtendedFab>` / `<FabMenu>`
+
+`FabSize`: `'small' | 'regular' | 'large'`. `FabMenu` takes `FabMenuItem[]` (id, icon, label, onTap).
+
+#### `<FloatingFabContainer>` / `useFloatingFabOffsets()`
+
+Wraps a FAB at the screen edge accounting for tab bar + insets. The hook returns `{ bottom, right, … }` in px if you want the math without the wrapper.
+
+#### `<ScreenScopedOverlay>`
+
+Mounts an overlay (sheet, drawer, dialog) above the current screen — sits below pushed routes. Use `level={SCREEN_OVERLAY_LEVEL_FLOATING}` (10) for menus / FABs and `level={SCREEN_OVERLAY_LEVEL_DRAWER}` (20) for drawers.
+
+#### `<NavigationDrawer>`
+
+Side drawer; takes `DrawerSection[]` of `DrawerItem`s, `open`, `onDismiss`, `selectedId`, `onSelect`.
+
+#### `<NavigationRail>`
+
+Vertical rail; takes `NavRailItem[]`, `selectedId`, `onSelect`.
+
+#### `useM3ThemeTokens()`
+
+Returns the M3 token set (`primary`, `onPrimary`, `surface`, `surfaceContainer*`, `outline`, `outlineVariant`, …) derived from the active palette in [tamer-system-ui](/packages/ui/tamer-system-ui.md).
+
+#### `px(...values)`
+
+Helper for converting a list of numbers to a px string.
+
+***
+
+## How it works
+
+- **App chrome** is a thin layer over plain Lynx `<view>` / `<text>` — no native module. `AppBar` / `TabBar` read insets from [tamer-insets](/packages/ui/tamer-insets.md) and palette from [tamer-system-ui](/packages/ui/tamer-system-ui.md). `Screen` / `SafeArea` come from [tamer-screen](/packages/ui/tamer-screen.md).
+- **`AppShellRouterContext`** is populated by `FileRouter` (or your own coordinator). Components that show a back button (`AppBar`, `NavigationDrawer` headers) consume it via `useAppShellRouter()`.
+- **M3 components** consume `useM3ThemeTokens()` directly, so any theme change propagates without re-rendering the whole tree manually.
+- **`ScreenScopedOverlay`** mounts into the active screen's overlay layer, not document root — pushed routes hide existing overlays automatically and overlays don't bleed across stack entries.
+- **`FloatingFabContainer`** subscribes to `useInsets()` + a constant tab-bar visual height (80px); `useFloatingFabOffsets()` exposes the same math.
+
+
+
+---
+url: /packages/core/tamer-dev-client.md
+---
+
+# tamer-dev-client
+
+Native dev client module for Tamer4Lynx — QR scan, discovery, URL persistence, reload bridge, embedded dev launcher UI.
+
+## Overview
+
+The dev client provides:
+
+- **Discovery** — Find dev servers on the local network (mDNS)
+- **Connect** — Enter URL or scan QR code to connect
+- **Recent** — List of recently used dev server URLs
+- **Reload** — Reload the Lynx bundle from the dev server
+- **Compatibility check** — Validates native modules between app and project; shows modal if incompatible
+
+### iOS: how the host’s native modules are known
+
+The dev server’s `meta.json` lists required native modules using the same JVM-style `moduleClassName` strings as Android (from each package’s `lynx.ext.json` / `tamer.json`).
+
+On **iOS**, Lynx does not enumerate registered modules at runtime. The host normally passes that list via `DevClientModule.attachSupportedModuleClassNames(...)` in generated `LynxInitProcessor.swift` (Tamer autolink).
+
+Additionally, **`t4l link ios` / `t4l bundle ios` / `t4l build ios`** (via autolink) writes **`tamer-host-native-modules.json`** into `ios/<AppName>/` and adds it to **Copy Bundle Resources**. It contains `{ "moduleClassNames": [ ... ] }` using the same discovery as dev server **`meta.json`** (`nativeModules[].moduleClassName`). `DevClientModule` reads this file **only when** the set from `attachSupportedModuleClassNames` is still empty (e.g. custom `LynxInit` without the `GENERATED DEV_CLIENT_SUPPORTED` block). Re-run **`t4l link ios`** after adding or removing `@tamer4lynx/*` native packages.
+
+**Recent tab:** Rows can show a cached icon (`data:` URL + `localStorage` when available) and a status dot: **green** when the server responds with Tamer `meta.json` and `tamerAppKey` matches the saved entry (if present); amber/gray/red for mismatch, stale meta, or offline.
+
+When you **build with debug** (`t4l build ios -d` / `t4l build android -d`), the dev client UI is embedded and the Lynx bundle is loaded from the connected dev server. Build with **release** (`t4l build ios -r` / `t4l build android -r`) for an **unsigned** app without the dev-client shell. **Production** (`t4l build ios -p` / `t4l build android -p`) is **signed** (store-oriented) and also omits the dev client; configure signing first (`t4l signing`). See [Getting Started](/guide/getting-started.md) and [Commands](/reference/commands.md).
+
+## Installation
+
+```bash
+t4l add tamer-dev-client
+# or the full dev stack (dev-client + dependencies):
+t4l add-dev
+```
+
+The CLI resolves npm’s default installable version for the package. To add the dependency by hand, use an **explicit version** from the registry instead of assuming **`latest`** matches the line you want. After install, run **`t4l link`** unless **`autolink`** runs it from **`postinstall`**.
+
+## Dependencies
+
+**Peer:** `@lynx-js/react`. **Bundled dependencies:** `@tamer4lynx/tamer-app-shell`, `tamer-insets`, `tamer-system-ui`, `tamer-plugin`, `tamer-router` (routing hooks like `useNavigate` come from **tamer-router**, which re-exports react-router—you do not need a direct `react-router` dependency for typical usage).
+
+## Setup
+
+Wrap your app with `DevLauncherProvider`:
+
+```tsx
+import { root } from '@lynx-js/react'
+import { FileRouter } from '@tamer4lynx/tamer-router'
+import { DevLauncherProvider } from '@tamer4lynx/tamer-dev-client'
+import routes from '@tamer4lynx/tamer-router/generated-routes'
+
+root.render(
+  <DevLauncherProvider>
+    <FileRouter routes={routes} />
+  </DevLauncherProvider>
+)
+```
+
+## API
+
+### DevLauncherProvider
+
+Context provider for the dev launcher. Pass `children` (your app tree).
+
+### useDevLauncher()
+
+Returns the dev launcher context. Throws if used outside `DevLauncherProvider`.
+
+| Property                      | Type                                     | Description                                                            |
+| ----------------------------- | ---------------------------------------- | ---------------------------------------------------------------------- |
+| `url`                         | `string`                                 | Current dev server URL                                                 |
+| `setUrl`                      | `(u: string) => void`                    | Set URL                                                                |
+| `navigateToConnectRef`        | `MutableRefObject<(() => void) \| null>` | Ref for navigating to Connect tab (e.g. after QR scan)                 |
+| `theme`                       | `DevLauncherTheme \| null`               | Theme from native (or null)                                            |
+| `setTheme`                    | `(t: DevLauncherTheme \| null) => void`  | Set theme                                                              |
+| `recentUrls`                  | `string[]`                               | Recently used URLs (derived from `recentEntries`)                      |
+| `recentEntries`               | `RecentEntry[]`                          | Recent rows: `url`, optional `label`, `iconUrl`, `tamerAppKey`         |
+| `recentReachability`          | `Record<string, RecentReachability>`     | Per-URL: `checking` \| `matched` \| `mismatch` \| `stale` \| `offline` |
+| `recentRowIconSrc`            | `Record<string, string>`                 | Cached `data:` icon URL per recent row `url`                           |
+| `discoveredServers`           | `DiscoveredServer[]`                     | mDNS-discovered servers                                                |
+| `removeRecentItem`            | `(url: string) => void`                  | Remove a recent URL (native + UI state)                                |
+| `showIncompatibleModalForUrl` | `(parsed: string) => void`               | Run compatibility check and open modal if missing modules              |
+| `connectError`                | `string`                                 | Last connect error (e.g. unreachable URL)                              |
+| `clearConnectError`           | `() => void`                             | Clear `connectError`                                                   |
+| `incompatibleModalVisible`    | `boolean`                                | Whether compatibility modal is shown                                   |
+| `setIncompatibleModalVisible` | `(v: boolean) => void`                   | Show/hide modal                                                        |
+| `incompatibleModules`         | `RequiredModule[]`                       | Modules required by project but missing in app                         |
+| `refreshRecent`               | `() => void`                             | Refresh recent URLs from native                                        |
+| `connectToUrl`                | `(parsed: string) => void`               | Connect to a parsed URL, reload bundle                                 |
+| `openProject`                 | `(rawUrl: string) => void`               | Parse URL and connect                                                  |
+| `onSelectRecent`              | `(u: string) => void`                    | Set URL when selecting from recent list                                |
+| `onScanQR`                    | `() => void`                             | Trigger QR scan                                                        |
+| `parseUrl`                    | `(input: string) => string`              | Normalize URL (`tamer://` → `http://`, strip `/main.lynx.bundle`)      |
+
+### DevLauncherTheme
+
+```ts
+interface DevLauncherTheme {
+  primary?: string
+  primaryDark?: string
+  background?: string
+  surface?: string
+  surfaceContainer?: string
+  onSurface?: string
+  onSurfaceVariant?: string
+  isDark?: boolean
+}
+```
+
+### resolveTheme(theme)
+
+Merges partial theme with `FALLBACK_THEME`. Use when theme may be null.
+
+### DiscoveredServer
+
+```ts
+type DiscoveredServer = {
+  url: string
+  name: string
+  compatible?: boolean
+  iconUrl?: string
+  tamerAppKey?: string
+}
+```
+
+### RecentEntry
+
+```ts
+type RecentEntry = { url: string; tamerAppKey?: string; label?: string; iconUrl?: string }
+```
+
+### RecentReachability
+
+`'checking' | 'matched' | 'mismatch' | 'stale' | 'offline'` — see Recent tab behavior above.
+
+### RequiredModule
+
+```ts
+type RequiredModule = { packageName: string; moduleClassName: string }
+```
+
+### devCall(method, data?, callback?)
+
+Low-level native bridge. Methods:
+
+| Method                     | Data              | Callback                                                  | Description                                                                                                                                                                                                     |
+| -------------------------- | ----------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `setDevServerUrl`          | `{ url: string }` | —                                                         | Save dev server URL                                                                                                                                                                                             |
+| `getDevServerUrl`          | —                 | `(url: string) => void`                                   | Get saved URL                                                                                                                                                                                                   |
+| `getRecentUrls`            | —                 | `(urls: string[]) => void`                                | Get recent URLs                                                                                                                                                                                                 |
+| `getRecentEntries`         | —                 | `(rows: RecentEntry[]) => void`                           | Get recent rows (when native supports it)                                                                                                                                                                       |
+| `removeRecentUrl`          | `{ url: string }` | —                                                         | Remove one recent URL                                                                                                                                                                                           |
+| `getDiscoveredServers`     | —                 | `(servers: DiscoveredServer[]) => void`                   | Get mDNS servers                                                                                                                                                                                                |
+| `startDiscovery`           | —                 | —                                                         | Start mDNS discovery                                                                                                                                                                                            |
+| `stopDiscovery`            | —                 | —                                                         | Stop discovery                                                                                                                                                                                                  |
+| `reloadWithProjectBundle`  | —                 | —                                                         | Reload bundle from dev server                                                                                                                                                                                   |
+| `checkServerCompatibility` | `{ url: string }` | `(compatible: boolean, requiredModules: unknown) => void` | Check app vs project `meta.json` `nativeModules`. On **iOS**, native delivers one NSArray argument; **`devCall` normalizes** to the same two-arg shape as Android. Use `toRequiredModules` on the second value. |
+| `scanQR`                   | —                 | —                                                         | Open QR scanner                                                                                                                                                                                                 |
+
+### toRequiredModules(raw)
+
+Parses `checkServerCompatibility` callback result into `RequiredModule[]`.
+
+## Built-in pages
+
+The dev client ships with Connect, Recent, and Discover pages. The layout uses `Tabs` with `titleForPath` for dynamic titles. Events:
+
+- `devclient:scanResult` — QR scan result (payload: `{ url }`)
+- `devclient:discoveredServers` — mDNS servers (payload: `{ servers }`)
+
+## Standard module pattern
+
+`tamer-dev-client` is a standard tamer module. When installed, `t4l sync android` (or `t4l sync`) reads host templates from the package (`android/templates/`, `ios/templates/`) and applies them to wire the dev client into your host app. The templates use `{{PACKAGE_NAME}}` and `{{APP_NAME}}` placeholders. (Sync is supported for Android; iOS dev client is synced via the iOS create/sync flow.)
+
+## Build behavior
+
+- **Debug build** (`t4l build ios -d` / `t4l build android -d`): If `@tamer4lynx/tamer-dev-client` is in your app's dependencies, the dev client is embedded. Your app becomes a dev app (QR scan, HMR).
+- **Release build** (`t4l build ios -r` / `t4l build android -r`): The dev client is not included. Use for production or store builds.
+
+## tamer-dev-app
+
+**tamer-dev-app** is a monorepo workspace app that bundles **tamer-dev-client** for a reference dev launcher. It is not part of the installable npm package set for app projects. In practice you still **build** that app (or your own app with **tamer-dev-client**) with **`t4l build … -d`** after **`t4l link`**, so the native side matches **your** linked modules—the same reason there is not yet a single prebuilt “install everywhere” HMR app on the store.
+
+A **generalized** dev launcher (one binary for typical workflows without per-project builds) is **planned**. Until then, treat your **debug** build as the HMR shell tailored to your **`node_modules`** and autolink output.
+
+
+
+---
+url: /packages/core/tamer-host.md
+---
+
+# tamer-host
+
+Production Lynx host templates for injecting LynxView into existing Android and iOS apps.
+
+## Overview
+
+`tamer-host` provides the minimal native infrastructure needed to run a Lynx bundle in an existing app:
+
+- **Android**: `App.java`, `TemplateProvider.java`, `MainActivity.kt`
+- **iOS**: `AppDelegate.swift`, `SceneDelegate.swift`, `ViewController.swift`, `LynxProvider.swift`, `LynxInitProcessor.swift`
+
+## Installation
+
+You usually don't need to install this manually. Running **`t4l create android`** or **`t4l create ios`** automatically pulls `tamer-host` templates when the package is present — the CLI falls back to inline templates if it isn't. If you are adding Tamer to an existing project that was created before `tamer-host` was introduced, install it explicitly:
+
+```bash
+t4l add tamer-host
+```
+
+Run **`t4l link`** after installing.
+
+## Usage
+
+### Inject into an existing project
+
+After creating an Android or iOS project (or if you already have one), run:
+
+```bash
+t4l inject android
+t4l inject ios
+```
+
+Use `--force` to overwrite existing files:
+
+```bash
+t4l inject android --force
+```
+
+### Embeddable output (no inject required)
+
+Build a production Lynx bundle plus code snippets you can add to any existing app:
+
+```bash
+t4l build android --embeddable
+```
+
+Outputs to `embeddable/`: the bundle, Android (Kotlin) and iOS (Swift) snippets, and a README.
+
+### Prerequisites
+
+- `tamer.config.json` with `android.packageName` / `ios.appName` and `ios.bundleId`
+- An existing Android project (`android/app/src/main/java/`, `android/app/src/main/kotlin/`) or iOS project (`ios/<AppName>/`)
+- Run `t4l link` after injecting to register native modules
+
+### Create flow
+
+`t4l create android` and `t4l create ios` use `tamer-host` templates when the package is installed. If `tamer-host` is not installed, the CLI falls back to inline templates.
+
+## Related
+
+- [tamer-dev-client](/packages/core/tamer-dev-client.md) — Adds dev launcher (QR scan, HMR, `meta.json` compatibility) on top of the host; iOS embedded flow syncs `LynxInitProcessor` + optional `tamer-host-native-modules.json` via `t4l link ios`
+- [Embedding LynxView into Native View](https://lynxjs.org/guide/embed-lynx-to-native) — Lynx guide for embedding LynxView in existing layouts
+
+
+
+---
+url: /packages/core/tamer-navigation.md
+---
+
+# tamer-navigation
+
+Native stack transport for Tamer. Provides `TamerNav` — the push/pop/dispatch bridge between the JS coordinator and native LynxView stack — plus global event hooks for stack lifecycle.
+
+This is the layer `tamer-router` is built on. You can use it directly if you want full control over coordinator logic without file-based routing.
+
+:::info Coming to npm
+`@tamer4lynx/tamer-navigation` will be published to npm shortly. For now it ships as a native submodule wired by `t4l link`. The API is stable.
+:::
+
+## Overview
+
+- **`TamerNav.push(options)`** — Push a new spoke LynxView onto the native stack
+- **`TamerNav.pop(options?)`** — Pop the top spoke, passing optional result payload back to the coordinator
+- **`TamerNav.popAll()`** — Clear the entire stack
+- **`TamerNav.dispatch(action)`** — Send an event to the coordinator (`tamer-nav:dispatch`)
+- **`TamerNav.update(options)`** — Broadcast updated state JSON to all open spokes
+- **Global events** — `tamer-nav:dispatch`, `tamer-nav:popped`, `tamer-nav:transition-end`
+
+## When to use directly
+
+Use `tamer-router` for most apps. Use `TamerNav` directly when:
+
+- You need a custom coordinator that manages stack state outside of React Router (e.g. a multi-bundle app where each stack entry is a different Lynx bundle)
+- You want full control over push/pop timing and result payloads
+- You're building something that doesn't fit a file-based page model
+
+The example app's [`src/example_stack.tsx`](https://github.com/tamer4lynx/tamer4lynx/blob/main/packages/example/src/example_stack.tsx) shows this pattern in full — a hand-rolled coordinator that calls `TamerNav.push`, `TamerNav.pop`, and listens to `tamer-nav:popped` to keep its own route stack in sync, with no `FileRouter` involved.
+
+### Using TamerNav with non-React Lynx bindings
+
+`TamerNav` itself is just a JS bridge over a native primitive — `push` / `pop` / `dispatch` / `update` work for any Lynx binding. What changes is how you wire **state hydration across spokes**, since `tamer-router`'s `providerConnector` is React-shaped.
+
+- **[miso-lynx](https://lynxjs.haskell-miso.org/) (Haskell):** Push/pop work as-is. For shared state, drive everything through your Haskell model and serialize the relevant slice into `TamerNav.push({ stateJson })`. On the spoke side, read it via `readHydratedStateJson` and decode it through your Haskell-side parser, then call `TamerNav.update({ stateJson })` from the spoke when the model changes. You won't use the React `providerConnector` array — replace it with the equivalent in your effect system.
+- **[VueLynx](https://vue.lynxjs.org/) (`@lynx-js/vue`):** Push/pop work as-is. Replace the React `providerConnector` with a Vue plugin (or a small composable) that reads `readHydratedStateJson` once on mount and calls `subscribeHydratedStateJson` to keep refs reactive. For Pinia, serialize each store's `$state` into the aggregate JSON on the coordinator and `pinia.state.value = parsed[storeKey]` on hydrate. The shape mirrors `createZustandSync` from `tamer-router` — see that for the contract you're reproducing.
+- **Other bindings (Solid, Svelte, vanilla):** Anything that exposes a `getState` / `subscribe` / `hydrate` triple can plug in. Build the equivalent of the React `TamerStateSync` shape (`{ key, serialize(), hydrate(json), subscribe(fn) }`) and run the aggregate on push / `tamer-nav:popped` yourself. `tamer-router`'s [`createTamerStateSync`](/packages/core/tamer-router.md#cross-spoke-state-providerconnector) is the reference implementation.
+
+In every case, the **native side** (Android `TamerNavHost`, iOS `TamerNavHost`) is identical — the binding boundary lives entirely in JS.
+
+## API
+
+### `TamerNav.push(options)`
+
+```ts
+TamerNav.push({
+  src: string          // bundle source (e.g. 'main.lynx.bundle')
+  screenId?: string    // unique ID for this screen instance
+  initData?: object    // passed to useInitData() in the spoke
+  stateJson?: string   // initial serialized state for providerConnector hydration
+})
+```
+
+### `TamerNav.pop(options?)`
+
+```ts
+TamerNav.pop({
+  screenId?: string    // which screen to pop (defaults to top)
+  source?: string      // e.g. 'system-back'
+  payloadJson?: string // result payload passed to coordinator via tamer-nav:popped
+})
+```
+
+### `TamerNav.popAll()`
+
+Clears the entire native stack.
+
+### `TamerNav.dispatch(action)`
+
+Fires `tamer-nav:dispatch` on the coordinator's global event bus. `action` is JSON-serialized and delivered as `{ action: string }`.
+
+```ts
+TamerNav.dispatch({ type: 'push-route', route: 'settings' })
+```
+
+### `TamerNav.update(options)`
+
+Broadcasts updated state to all open spokes via `globalProps`. Used by `tamer-router` to sync `providerConnector` state after mutations.
+
+```ts
+TamerNav.update({ stateJson: JSON.stringify(myState) })
+```
+
+### Global events
+
+Listen with `useLynxGlobalEventListener`:
+
+| Event                      | Payload                                  | Description                                          |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------- |
+| `tamer-nav:dispatch`       | `{ action: string }`                     | Action dispatched from a spoke                       |
+| `tamer-nav:popped`         | `{ screenId?: string; result?: string }` | Spoke was popped; result is `payloadJson` from spoke |
+| `tamer-nav:transition-end` | —                                        | Push/pop animation completed                         |
+
+### `readHydratedStateJson()` / `subscribeHydratedStateJson()`
+
+Utilities for spokes to read and subscribe to state hydration from the coordinator:
+
+```ts
+import { readHydratedStateJson, subscribeHydratedStateJson } from '@tamer4lynx/tamer-navigation'
+
+// Read current state on mount
+const stateJson = readHydratedStateJson(defaultJson)
+
+// Subscribe to updates
+useEffect(() => {
+  return subscribeHydratedStateJson((stateJson) => {
+    store.hydrate(parseSharedState(stateJson))
+  })
+}, [])
+```
+
+## LynxGroup requirements
+
+`TamerNav` requires the native `LynxGroup` / `LynxViewGroup` API — Android and iOS host must use `TamerNavHost` (wired by `t4l link`). The push/pop calls are no-ops without it.
+
+## Related
+
+- [tamer-router](/packages/core/tamer-router.md) — Higher-level file-based routing built on top of `TamerNav`
+- [tamer-host](/packages/core/tamer-host.md) — Host templates that wire `TamerNavHost` into your native app
+
+
+
+---
+url: /packages/core/tamer-plugin.md
+---
+
+# tamer-plugin
+
+Rsbuild plugin that loads `tamer.config` from the project and workspace packages, then applies nested plugins.
+
+## Overview
+
+- Reads `tamer.config.json`, `tamer.config.ts`, `tamer.config.mjs`, or `tamer.config.js` from project root
+- Falls back to workspace packages and `node_modules` packages that export `./tamer.config`
+- Merges config; options passed to `pluginTamer()` override file config (except `false` to disable)
+- Runs nested Rsbuild plugins from the merged config
+
+## Installation
+
+```bash
+t4l add tamer-plugin
+```
+
+## Usage
+
+```ts
+import { defineConfig } from '@lynx-js/rspeedy'
+import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
+import { pluginTamer } from '@tamer4lynx/tamer-plugin'
+
+export default defineConfig({
+  plugins: [
+    pluginTamer(),
+    pluginReactLynx(),
+  ],
+})
+```
+
+## API
+
+### pluginTamer(options?)
+
+```ts
+pluginTamer(options?: TamerPluginOptions): RsbuildPlugin
+```
+
+`TamerPluginOptions` is `Record<string, boolean | Record<string, unknown> | RsbuildPlugin>`. Values can be:
+
+- `RsbuildPlugin` — setup is called
+- `false` — disables that key from file config
+- Other — overrides file config for that key
+
+### tamer.config format
+
+Export an object (default or `tamerDefaults`) with keys such as:
+
+- `rsbuildConfig` — partial Rsbuild config (e.g. `source.preEntry`)
+- Plugin keys — e.g. `tamerRouter` for tamer-router's plugin
+
+Example `tamer.config.ts`:
+
+```ts
+import { tamerRouterPlugin } from '@tamer4lynx/tamer-router'
+
+export default {
+  tamerRouter: tamerRouterPlugin({
+    root: './src/pages',
+    output: './src/generated/_generated_routes.tsx',
+    layoutFilename: '_layout.tsx',
+  }),
+}
+```
+
+
+
+---
+url: /packages/core/tamer-router.md
+---
+
+# tamer-router
+
+File-based routing for Lynx with React Router 6 + TamerNav native stack coordination. Covers file-based route generation, hardware back handling, and cross-spoke state synchronization.
+
+## Overview
+
+- **File-based routing:** Rsbuild plugin scans `pages/` → generates route tree. Conventions: `index` → index route, `[param]` → dynamic segment, `_layout.tsx` → layout wrapper.
+- **Native stack:** `FileRouter` pushes spoke LynxViews via `TamerNav` from `@tamer4lynx/tamer-navigation`. Coordinator manages route stack.
+- **Layout components:** `Stack` / `Tabs` with AppBar, TabBar, Content (via tamer-app-shell).
+- **State bridging:** `providerConnector` prop syncs React Context / hooks across spoke boundaries. **Required if your app uses any React providers (Zustand, Redux, TanStack Query, i18n, theme, etc.)** — each spoke gets a fresh JS context and won't inherit the coordinator's provider state without this. See **Cross-spoke state** below.
+- **Hardware back:** `BackHandlerProvider` + `useBackHandler` intercept Android back / iOS gesture.
+- **Manual coordinator:** Don't need `FileRouter`? Use `TamerNav` directly from `@tamer4lynx/tamer-navigation` with `BackHandlerProvider` for back handling. The example app's [`src/example_stack.tsx`](https://github.com/tamer4lynx/tamer4lynx/blob/main/packages/example/src/example_stack.tsx) shows this pattern — a hand-rolled coordinator that calls `TamerNav.push` / `TamerNav.pop` without any file-based routing. `tamer-router` is a higher-level solution built on top of the same primitives.
+
+:::tip Refactored recently
+`tamer-router` has gone through a significant internal refactor. If you are one of the handful of people already using it — you know who you are — the public API is the same but the internals are cleaner. If it breaks, please file an issue.
+:::
+
+## Installation
+
+```bash
+t4l add tamer-router
+```
+
+Peers: **`react-router@^6`**. Run **`t4l link`** after install.
+
+## Setup
+
+### 1. Rsbuild config
+
+Use **tamer-plugin** (applies default tamer-router config automatically):
+
+```ts
+import { defineConfig } from '@lynx-js/rspeedy'
+import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
+import { pluginTamer } from '@tamer4lynx/tamer-plugin'
+
+export default defineConfig({
+  plugins: [
+    pluginTamer(),
+    pluginReactLynx(),
+  ],
+})
+```
+
+Or configure **tamerRouterPlugin** directly:
+
+```ts
+import { tamerRouterPlugin } from '@tamer4lynx/tamer-router'
+
+export default {
+  plugins: [
+    tamerRouterPlugin({
+      root: './src/pages',
+      srcAlias: '@/',
+      layoutFilename: '_layout.tsx',
+    }),
+  ],
+}
+```
+
+### 2. Entry point
+
+```tsx
+import { root } from '@lynx-js/react'
+import { FileRouter } from '@tamer4lynx/tamer-router'
+
+root.render(<FileRouter />)
+```
+
+Optional: pass `providerConnector` to bridge state across spokes (see **Cross-spoke state** below).
+
+### 3. Layout (example)
+
+`src/pages/_layout.tsx`:
+
+```tsx
+import { Stack } from '@tamer4lynx/tamer-router'
+import { useSystemUI } from '@tamer4lynx/tamer-system-ui'
+
+export default function Layout() {
+  const { setStatusBar } = useSystemUI()
+
+  useEffect(() => {
+    setStatusBar({ color: '#fff', style: 'light' })
+  }, [])
+
+  return (
+    <Stack>
+      <Stack.Screen name="index" path="/" options={{ title: 'Home' }} />
+      <Stack.Screen name="detail" path="/detail/:id" options={{ title: 'Detail' }} />
+    </Stack>
+  )
+}
+```
+
+## API
+
+### `<FileRouter>`
+
+Auto-generates routes from `pages/` directory and manages coordinator/spoke pushing via TamerNav.
+
+```tsx
+<FileRouter
+  children?: ReactNode
+  lazyRoutes?: boolean
+  providerConnector?: TamerProviderConnector[]
+  basename?: string
+  knownPaths?: string[]
+  rootBackgroundColor?: string
+  exitOnRootHardwareBack?: boolean
+/>
+```
+
+| Prop                     | Type               | Description                                                                |
+| ------------------------ | ------------------ | -------------------------------------------------------------------------- |
+| `providerConnector`      | `TamerStateSync[]` | State syncs to bridge across spokes (optional). See **Cross-spoke state**. |
+| `exitOnRootHardwareBack` | `boolean`          | Exit app if back pressed at root (default: false)                          |
+| Other props              |                    | React Router config (`basename`, etc.)                                     |
+
+### Cross-spoke state: `providerConnector`
+
+Each spoke LynxView gets a fresh JS context. Module-level singletons (Zustand, Redux) re-evaluate per spoke. React Context set on the coordinator doesn't survive into spokes. **If your app uses any React provider — state management, theming, i18n, data fetching — you need `providerConnector` to carry that state across screen pushes.**
+
+Pass `providerConnector` to bridge state explicitly:
+
+```tsx
+import { FileRouter, createZustandSync } from '@tamer4lynx/tamer-router'
+import { myStore } from './store'
+
+const mySync = createZustandSync('myStore', myStore)
+
+<FileRouter providerConnector={[mySync]} />
+```
+
+On push, `FileRouter` serializes all syncs to JSON and hydrates spokes. On mutation, spokes re-serialize back via `TamerNav.update`. Coordinators listen to `tamer-nav:dispatch` events.
+
+### Built-in connectors
+
+`tamer-router` ships purpose-built connectors for the libraries the example app exercises. Each one is a thin wrapper around `createTamerStateSync` that knows how to serialize / hydrate that library's store and (for Redux-style libs) how to forward dispatched actions across spokes.
+
+| Connector                                   | Library                                             | What it carries across spokes                                                                        | Spoke → coordinator action forwarding                                                                          |
+| ------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `createZustandSync(key, store)`             | [Zustand](https://github.com/pmndrs/zustand)        | Whole store snapshot via `store.getState()` / `store.setState(parsed, true)`                         | No (mutate via `setState` on the spoke; coordinator hydrates back)                                             |
+| `createReduxSync(key, store)`               | [Redux](https://redux.js.org/)                      | `store.getState()` snapshot; rehydrates with a synthetic `@@TAMER_HYDRATE` action                    | Yes — `store.dispatch` on a spoke is forwarded as a `tamer-nav:dispatch` event and replayed on the coordinator |
+| `createTanstackQuerySync(key, queryClient)` | [TanStack Query v5](https://tanstack.com/query)     | Serialized query cache (`dehydrate` / `hydrate` from `@tanstack/react-query`)                        | Optional — exposes a `send` for invalidation events                                                            |
+| `createApolloSync(key, client)`             | [Apollo Client](https://www.apollographql.com/)     | `client.cache.extract()` / `client.cache.restore()`                                                  | No                                                                                                             |
+| `createSwrSync(key, cache)`                 | [SWR](https://swr.vercel.app/)                      | Tracked SWR cache (use `createTrackedSwrCache()` from this package as the SWR provider's `provider`) | No                                                                                                             |
+| `createJotaiSync(key, store)`               | [Jotai](https://jotai.org/)                         | Atom snapshot for atoms registered with the sync                                                     | No                                                                                                             |
+| `createRecoilSync(key, ...)`                | [Recoil](https://recoiljs.org/)                     | Tracked atoms via the Recoil snapshot API                                                            | No                                                                                                             |
+| `createI18nextSync(key, i18n)`              | [i18next](https://www.i18next.com/)                 | Active language + loaded resource bundles                                                            | No                                                                                                             |
+| `createThemeSync(key, themeStore)`          | Tamer-internal theme store / generic palette object | Theme state as plain JSON                                                                            | No                                                                                                             |
+
+```tsx
+import { FileRouter, createZustandSync, createReduxSync } from '@tamer4lynx/tamer-router'
+import { useStore } from './useStore'
+import { reduxStore } from './reduxStore'
+
+const connectors = [
+  createZustandSync('app', useStore),
+  createReduxSync('redux', reduxStore),
+]
+
+<FileRouter providerConnector={connectors} />
+```
+
+Each connector picks a unique `key` — keep them stable across releases (the JSON aggregate is keyed by it).
+
+### Connector lifecycle
+
+The coordinator owns the `providerConnector` array and runs the aggregate. Per push/pop the flow is:
+
+1. **On `TamerNav.push`** — coordinator calls `serialize()` on each sync, builds `{ [key]: <slice> }`, and passes the aggregate as `stateJson`.
+2. **Spoke mounts** — `FileRouter` (mounted on the spoke side as well) reads `readHydratedStateJson()` once, splits the aggregate by key, and calls each sync's `hydrate(json)`. The store now matches the coordinator's snapshot.
+3. **On spoke mutation** — when a tracked store updates, the spoke re-serializes and broadcasts via `TamerNav.update({ stateJson })`. Coordinator receives it, re-hydrates its own copy, then **all other open spokes** also re-hydrate. Stores stay coherent across the stack.
+4. **For libraries with actions (Redux):** the spoke's `store.dispatch(action)` is also wrapped — the action is sent as a `tamer-nav:dispatch` event and replayed on the coordinator before the next `update` fires.
+
+If `dispatchConnectorMutations` is enabled, the same dispatch round-trip is applied to every connector, not just Redux.
+
+### Writing a connector for an unsupported provider
+
+If your library isn't in the table above, you can still bridge it. Build a `TamerStateSync` directly:
+
+```ts
+import { createTamerStateSync } from '@tamer4lynx/tamer-router'
+import { myStore } from './myStore'
+
+const mySync = createTamerStateSync('my-store', {
+  getState: () => myStore.snapshot(),
+  subscribe: (listener) => myStore.on('change', listener),
+  hydrate: (json) => myStore.replace(JSON.parse(json)),
+  // Optional — implement only if your store has a dispatch / action concept worth replaying
+  send: (action) => myStore.dispatch(action),
+})
+
+<FileRouter providerConnector={[mySync]} />
+```
+
+Contract:
+
+- **`getState()`** — return the JSON-serializable snapshot. If your store holds non-serializable values (functions, class instances, dates), strip / convert them here.
+- **`subscribe(listener)`** — call `listener()` whenever state changes. Return an unsubscribe function.
+- **`hydrate(json)`** — accept the JSON snapshot and replace local state. **Idempotent** — `tamer-router` may call this multiple times during cross-spoke updates.
+- **`send(action)`** — optional. Use only when there's a meaningful action object (Redux, Pinia mutations) you want replayed on every spoke. For pure state-replication libs (Zustand, Apollo cache), leave it off.
+
+`createTamerStateSync` is intentionally tiny — every built-in connector is just a thin shim that knows the library's API for the four bullets above. If you author one for a popular library, please file a PR so it can be added to the built-in list.
+
+### Non-React Lynx bindings (miso-lynx, VueLynx, …)
+
+`tamer-router` is React-only. For Vue or Haskell Lynx bindings, use [`tamer-navigation`](/packages/core/tamer-navigation.md#using-tamernav-with-non-react-lynx-bindings) directly — that page lays out the equivalent state-hydration patterns for Vue's Pinia, Haskell's effect models, and other bindings.
+
+### `<Stack>`
+
+Stack navigation with AppBar and Content.
+
+```tsx
+<Stack screenOptions={{ headerStyle?, headerShown? }}>
+  <Stack.Screen name="index" path="/" options={{ title?, headerShown? }} />
+  <Stack.Screen name="detail" path="/detail/:id" options={{ title? }} />
+</Stack>
+```
+
+### `<Tabs>`
+
+Tabs navigation with AppBar, Content, and TabBar.
+
+```tsx
+<Tabs screenOptions={{ headerStyle?, tabBarStyle?, contentStyle?, iconColor? }}>
+  <Tabs.Screen name="index" path="/" options={{ title?, icon?, label? }} />
+  <Tabs.Screen name="settings" path="/settings" options={{ title?, icon?, label? }} />
+</Tabs>
+```
+
+### `useBackHandler` / `usePreventBack`
+
+Intercept hardware back (Android) / pop gesture (iOS) **before** default handling.
+
+```tsx
+import { useBackHandler, usePreventBack } from '@tamer4lynx/tamer-router'
+
+// Close modal instead of leaving screen
+useBackHandler(() => {
+  if (modalOpen) {
+    setModalOpen(false)
+    return true  // consumed
+  }
+  return false   // pass through
+})
+
+// Block back while unsaved
+usePreventBack(isDirty)
+```
+
+Handlers are LIFO. When none return `true`, `FileRouter` pops the stack. In manual coordinator setups, you handle the fallback yourself.
+
+### `useTamerRouter()`
+
+```tsx
+const { push, replace, back, canGoBack, navigate } = useTamerRouter()
+
+push('/detail/42')
+replace('/home')
+back()
+```
+
+### Re-exports from React Router
+
+`useLocation`, `useNavigate`, `useParams`, `useLocalSearchParams`, `Outlet` / `Slot`, `Link`
+
+
+
+---
+url: /packages/index.md
+---
+
+# Packages
+
+This page lists every installable **`@tamer4lynx/*`** package and how to install it.
+
+**Why use `t4l add` instead of npm?**\
+Packages are published under **`@tamer4lynx`** on npm, but the **`latest`** dist-tag does not always point at the newest semver. The CLI resolves each package to npm’s default installable line and then you run **`t4l link`** to wire native code. That is the supported path.
+
+| Goal                                                            | Command                                      |
+| --------------------------------------------------------------- | -------------------------------------------- |
+| Full production-ready app stack (routing, UI, transports, host) | `t4l add-core`                               |
+| Everything in core plus the dev launcher (QR scan, HMR)         | `t4l add-dev`                                |
+| Individual packages                                             | `t4l add <name>` (e.g. `t4l add tamer-auth`) |
+
+**Manual install** (only if you must): `npm install @tamer4lynx/<pkg>@<exact-version>` with a version taken from the npm registry page, then `t4l link`.
+
+See [Example Anatomy](/guide/example-anatomy.md) for how the repo's sample app combines these packages.
+
+**Legend:** **📦 core** = included in `t4l add-core`. **🛠 dev** = added by `t4l add-dev` (superset of core).
+
+## Core
+
+Section: [Core packages](/packages/core/index.md)
+
+| Package                                                            | Included | Add command                | Description                                                                                           |
+| ------------------------------------------------------------------ | :------: | -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [@tamer4lynx/tamer-host](/packages/core/tamer-host.md)             |  📦 core | `t4l add tamer-host`       | Lynx host templates — usually auto-installed by `t4l create`; add manually for existing projects      |
+| [@tamer4lynx/tamer-navigation](/packages/core/tamer-navigation.md) |  📦 core | `t4l add tamer-navigation` | Native stack transport (`TamerNav` push/pop/dispatch) — coming to npm                                 |
+| [@tamer4lynx/tamer-plugin](/packages/core/tamer-plugin.md)         |  📦 core | `t4l add tamer-plugin`     | Rsbuild plugin that loads `tamer.config` and merges nested plugins                                    |
+| [@tamer4lynx/tamer-router](/packages/core/tamer-router.md)         |  📦 core | `t4l add tamer-router`     | File-based routing, Stack/Tabs layouts, `useBackHandler` / `usePreventBack`, cross-spoke state bridge |
+| [@tamer4lynx/tamer-app-shell](/packages/core/tamer-app-shell.md)   |  📦 core | `t4l add tamer-app-shell`  | AppBar, TabBar, Content navigation chrome                                                             |
+| [@tamer4lynx/tamer-dev-client](/packages/core/tamer-dev-client.md) |  🛠 dev  | `t4l add-dev`              | Dev launcher — QR scan, discovery, recent (live reachability), native module compatibility            |
+
+## UI
+
+Section: [UI packages](/packages/ui/index.md)
+
+| Package                                                        | Included | Add command               | Description                                    |
+| -------------------------------------------------------------- | :------: | ------------------------- | ---------------------------------------------- |
+| [@tamer4lynx/tamer-screen](/packages/ui/tamer-screen.md)       |  📦 core | `t4l add tamer-screen`    | Screen, SafeArea, AvoidKeyboard                |
+| [@tamer4lynx/tamer-insets](/packages/ui/tamer-insets.md)       |  📦 core | `t4l add tamer-insets`    | Safe area and keyboard insets                  |
+| [@tamer4lynx/tamer-system-ui](/packages/ui/tamer-system-ui.md) |  📦 core | `t4l add tamer-system-ui` | Status bar, nav bar, theme colors              |
+| [@tamer4lynx/tamer-icons](/packages/ui/tamer-icons.md)         |  📦 core | `t4l add tamer-icons`     | Native `<icon>` element; typings via `.tamer/` |
+
+Text inputs use Lynx built-in `<input>` and `<textarea>` (xelement-input). Add `implementation(libs.lynx.xelement.input)` to your app; autolink adds it when needed.
+
+## Platform
+
+Section: [Platform packages](/packages/platform/index.md)
+
+| Package                                                                          | Included | Add command                     | Description                                                        |
+| -------------------------------------------------------------------------------- | :------: | ------------------------------- | ------------------------------------------------------------------ |
+| [@tamer4lynx/tamer-transports](/packages/platform/tamer-transports.md)           |  📦 core | `t4l add tamer-transports`      | Fetch, WebSocket, EventSource polyfills                            |
+| [@tamer4lynx/tamer-linking](/packages/platform/tamer-linking.md)                 |  🛠 dev  | `t4l add tamer-linking`         | Deep linking — also installed by `t4l add-dev` for QR/URL handling |
+| [@tamer4lynx/tamer-local-storage](/packages/platform/tamer-local-storage.md)     |          | `t4l add tamer-local-storage`   | Web `localStorage` API (SharedPreferences / UserDefaults)          |
+| [@tamer4lynx/jiggle](/packages/platform/jiggle.md)                               |          | `t4l add jiggle`                | Vibration/haptic native module                                     |
+| [@tamer4lynx/tamer-auth](/packages/platform/tamer-auth.md)                       |          | `t4l add tamer-auth`            | OAuth 2.0 / PKCE                                                   |
+| [@tamer4lynx/tamer-secure-store](/packages/platform/tamer-secure-store.md)       |          | `t4l add tamer-secure-store`    | Secure key-value storage                                           |
+| [@tamer4lynx/tamer-biometric](/packages/platform/tamer-biometric.md)             |          | `t4l add tamer-biometric`       | Biometric authentication                                           |
+| [@tamer4lynx/tamer-display-browser](/packages/platform/tamer-display-browser.md) |          | `t4l add tamer-display-browser` | In-app browser for OAuth                                           |
+| [@tamer4lynx/tamer-webview](/packages/platform/tamer-webview.md)                 |          | `t4l add tamer-webview`         | Native `<webview>` (WKWebView / Android WebView)                   |
+
+## Tooling
+
+Section: [Tooling](/packages/tooling/index.md)
+
+| Package                                                         | Included | Add command          | Description                                                                                     |
+| --------------------------------------------------------------- | :------: | -------------------- | ----------------------------------------------------------------------------------------------- |
+| [@tamer4lynx/tamer-env](/packages/tooling/tamer-env.md)         |  📦 core | `t4l add tamer-env`  | `.env` loading and `process.env` / `defineFromEnv` for Rspeedy; auto-discovered by tamer-plugin |
+| [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md) |          | — (generated by CLI) | `.tamer/tamer-components.d.ts` from `t4l init` / `t4l link`                                     |
+
+
+
+---
+url: /packages/platform/index.md
+---
+
+# Platform packages
+
+Networking polyfills, storage, auth, linking, haptics, and embedded web content.
+
+| Package                                                              | Role                                    |
+| -------------------------------------------------------------------- | --------------------------------------- |
+| [tamer-transports](/packages/platform/tamer-transports.md)           | Fetch, WebSocket, EventSource polyfills |
+| [tamer-local-storage](/packages/platform/tamer-local-storage.md)     | Web `localStorage` on native            |
+| [jiggle](/packages/platform/jiggle.md)                               | Vibration / haptics                     |
+| [tamer-auth](/packages/platform/tamer-auth.md)                       | OAuth 2.0 / PKCE                        |
+| [tamer-secure-store](/packages/platform/tamer-secure-store.md)       | Secure key-value storage                |
+| [tamer-biometric](/packages/platform/tamer-biometric.md)             | Biometric authentication                |
+| [tamer-linking](/packages/platform/tamer-linking.md)                 | Deep links and URL handling             |
+| [tamer-display-browser](/packages/platform/tamer-display-browser.md) | In-app browser (e.g. OAuth)             |
+| [tamer-webview](/packages/platform/tamer-webview.md)                 | Native `<webview>` element              |
+
+Add only what you need with **`t4l add <name>`**. **`t4l add-core`** includes **tamer-transports** but not auth, webview, or local storage.
+
+
+
+---
+url: /packages/platform/jiggle.md
+---
+
+# @tamer4lynx/jiggle
+
+Vibration/haptic native module for Lynx. Exposes `vibrate(durationMs)` to the Lynx runtime.
+
+## Installation
+
+```bash
+t4l add jiggle
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+| Method                | Description                                                   |
+| --------------------- | ------------------------------------------------------------- |
+| `vibrate(durationMs)` | Vibrates the device for the provided duration in milliseconds |
+
+**Parameters:** `durationMs` (number) — duration in milliseconds.
+
+**Usage:**
+
+```js
+if (global.NativeModules?.Jiggle) {
+  NativeModules.Jiggle.vibrate(200)
+}
+```
+
+## Platform
+
+Uses **lynx.ext.json**. Run `t4l link` after adding to your app.
+
+
+
+---
+url: /packages/platform/tamer-auth.md
+---
+
+# tamer-auth
+
+OAuth 2.0 / PKCE auth flow for Lynx. Depends on tamer-linking and tamer-display-browser.
+
+## Overview
+
+- **AuthRequest** — Build auth URL, prompt user, parse callback
+- **makeRedirectUri** — Create redirect URI for OAuth
+- **exchangeCodeAsync** — Exchange authorization code for tokens
+- **TokenResponse** — Token storage and refresh
+
+Uses PKCE by default. Opens auth URL via `openAuthSessionAsync` (tamer-display-browser), parses redirect for `code` and `state`.
+
+## Installation
+
+```bash
+t4l add tamer-auth tamer-linking tamer-display-browser
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### AuthRequest
+
+```ts
+new AuthRequest(config: AuthRequestConfig)
+```
+
+`AuthRequestConfig`: `clientId`, `redirectUri`, `scopes?`, `responseType?`, `usePKCE?`, `state?`, `extraParams?`
+
+- `makeAuthUrlAsync(discovery: AuthDiscoveryDocument): Promise<string>` — Build auth URL
+- `promptAsync(discovery): Promise<AuthSessionResult>` — Open browser, wait for redirect
+- `parseReturnUrl(url)` — Parse callback URL for code/state
+
+### makeRedirectUri(options?)
+
+```ts
+makeRedirectUri({ scheme?, path? }): string
+```
+
+Default scheme: `tamerdevapp`. Default path: `auth/callback`.
+
+### exchangeCodeAsync
+
+Exchange authorization code for tokens. See `AuthRequest` and `TokenResponse` types.
+
+### TokenResponse
+
+Token storage. See source for methods.
+
+
+
+---
+url: /packages/platform/tamer-biometric.md
+---
+
+# tamer-biometric
+
+Biometric authentication for Lynx. Requires `BiometricModule`.
+
+## Overview
+
+- **hasHardwareAsync** — Device has biometric hardware
+- **isEnrolledAsync** — User has enrolled biometrics
+- **authenticateAsync** — Prompt for biometric auth
+- **supportedAuthenticationTypesAsync** — Returns `AuthenticationType[]`
+
+## Installation
+
+```bash
+t4l add tamer-biometric
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### hasHardwareAsync()
+
+Returns `Promise<boolean>`.
+
+### isEnrolledAsync()
+
+Returns `Promise<boolean>`.
+
+### authenticateAsync(options?)
+
+```ts
+interface AuthenticateOptions {
+  promptMessage?: string
+  cancelLabel?: string
+  disableDeviceFallback?: boolean
+}
+```
+
+Returns `Promise<AuthenticateResult>`: `{ success: true }` or `{ success: false; error: string }`.
+
+### supportedAuthenticationTypesAsync()
+
+Returns `Promise<AuthenticationType[]>`.
+
+### AuthenticationType
+
+`FINGERPRINT` (1), `FACIAL_RECOGNITION` (2), `IRIS` (3).
+
+
+
+---
+url: /packages/platform/tamer-display-browser.md
+---
+
+# tamer-display-browser
+
+In-app browser for Lynx. Requires `DisplayBrowserModule`. Used by tamer-auth for OAuth.
+
+## Overview
+
+- **openBrowserAsync** — Open URL in in-app browser
+- **openAuthSessionAsync** — Open auth URL, wait for redirect to `redirectUrl`
+- **dismissBrowser** — Close the browser
+
+When `openAuthSessionAsync` is not implemented natively, falls back to `openBrowserAsync` + `addEventListener('url')` from tamer-linking.
+
+## Installation
+
+```bash
+t4l add tamer-display-browser tamer-linking
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### openBrowserAsync(url)
+
+Returns `Promise<{ type: string }>`. `type` may be `'opened'` or `'unavailable'`.
+
+### openAuthSessionAsync(url, redirectUrl)
+
+Returns `Promise<AuthSessionResult>`:
+
+```ts
+type AuthSessionResult =
+  | { type: 'success'; url: string }
+  | { type: 'cancel' }
+  | { type: 'dismiss' }
+```
+
+### dismissBrowser()
+
+Closes the browser. Callback-based; no return value.
+
+
+
+---
+url: /packages/platform/tamer-linking.md
+---
+
+# tamer-linking
+
+Deep linking and external URL handling for Lynx. Requires the native `LinkingModule`.
+
+## Install
+
+```bash
+t4l add tamer-linking
+```
+
+Run **`t4l link`** after installing.
+
+## Usage
+
+### Open an external URL
+
+```ts
+import { openURL } from '@tamer4lynx/tamer-linking'
+
+await openURL('https://example.com')
+await openURL('mailto:hello@example.com')
+await openURL('tamerdevapp://about')
+```
+
+### Build an app URL
+
+```ts
+import { createURL } from '@tamer4lynx/tamer-linking'
+
+createURL('settings/profile', {
+  scheme: 'myapp',
+  queryParams: { tab: 'security' },
+})
+// → 'myapp://settings/profile?tab=security'
+```
+
+### Listen for incoming URLs
+
+```ts
+import { addEventListener } from '@tamer4lynx/tamer-linking'
+
+useEffect(() => {
+  const sub = addEventListener('url', ({ url }) => {
+    // route to the right screen based on url
+  })
+  return () => sub.remove()
+}, [])
+```
+
+### Read the URL the app launched with
+
+```ts
+import { getInitialURL } from '@tamer4lynx/tamer-linking'
+
+const initial = await getInitialURL()
+if (initial) navigate(initial)
+```
+
+## API
+
+### `openURL(url)`
+
+```ts
+openURL(url: string): Promise<boolean>
+```
+
+Hands the URL off to the system. Resolves `true` when the OS reports a successful open, `false` otherwise (no handler, malformed URL, native bridge unavailable). Works for `https://`, `mailto:`, `tel:`, `sms:`, App Store / Play Store URLs, and any registered custom scheme.
+
+### `createURL(path?, options?)`
+
+```ts
+createURL(path = '', { scheme?, path?, queryParams? }): string
+```
+
+Default scheme: `tamerdevapp`. Uses `LinkingModule.createURL` when available.
+
+### `getInitialURL()`
+
+Returns `Promise<string | null>`.
+
+### `addEventListener(type: 'url', listener)`
+
+Returns `{ remove: () => void }`. Listener receives `{ url: string }`.
+
+### `removeEventListener(type: 'url', listener)`
+
+Removes the subscription.
+
+***
+
+## How it works
+
+- **iOS:** `openURL` calls `UIApplication.shared.open(url, options: [:])` on the main thread. `addEventListener('url', …)` listens for `application(_:open:options:)` and `userActivity(.continueUserActivity)` callbacks dispatched by the host.
+- **Android:** `openURL` dispatches `Intent.ACTION_VIEW` with `FLAG_ACTIVITY_NEW_TASK`. URL events come from the host's `onCreate` / `onNewIntent` handlers.
+- The simulator without Mail.app installed resolves `false` for `mailto:` — that's expected. Real devices and any sim with Mail / Safari installed work normally.
+- `createURL` is a pure helper that prefers the native bridge for canonical scheme handling, but falls back to JS string assembly when the bridge isn't available.
+
+
+
+---
+url: /packages/platform/tamer-local-storage.md
+---
+
+# tamer-local-storage
+
+Web-standard `localStorage` API for Lynx: persistent key-value storage via **Android SharedPreferences** and **iOS UserDefaults**.
+
+## Installation
+
+```bash
+t4l add tamer-local-storage
+```
+
+Run **`t4l link`** after installing. This package is **not** part of `t4l add-core`; add it explicitly if you need it.
+
+## Usage
+
+**Named import:**
+
+```tsx
+import { localStorage } from '@tamer4lynx/tamer-local-storage'
+
+localStorage.setItem('username', 'john_doe')
+const username = localStorage.getItem('username')
+localStorage.removeItem('username')
+localStorage.clear()
+```
+
+**Side-effect / global** (optional): `import '@tamer4lynx/tamer-local-storage'` or `import '@tamer4lynx/tamer-local-storage/global'` to attach `globalThis.localStorage` when absent.
+
+## API
+
+Implements the [Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage) surface: `getItem`, `setItem`, `removeItem`, `clear`. Key enumeration (`key`, `length`) is limited on native backends—see the package README on GitHub for details.
+
+## Native
+
+Uses **`lynx.ext.json`** for autolinking. After install, run **`t4l link`**.
+
+## See also
+
+- [Packages overview](/packages/index.md) — other `@tamer4lynx` modules
+
+
+
+---
+url: /packages/platform/tamer-secure-store.md
+---
+
+# tamer-secure-store
+
+Secure key-value storage for Lynx. Uses native keychain/Keystore. Requires `SecureStoreModule`.
+
+## Overview
+
+- **getItemAsync** / **setItemAsync** / **deleteItemAsync** — Async key-value API
+- **getItem** / **setItem** — Sync variants (if supported)
+- **canUseBiometricAuthentication** — Check if biometric can protect items
+- **isAvailableAsync** — Check if secure store is available
+- **KeychainAccessibilityConstant** — When items are accessible
+
+## Installation
+
+```bash
+t4l add tamer-secure-store
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### getItemAsync(key, options?)
+
+Returns `Promise<string | null>`. Keys must match `/^[\w.-]+$/`.
+
+### setItemAsync(key, value, options?)
+
+Returns `Promise<void>`. Value must be string.
+
+### deleteItemAsync(key, options?)
+
+Returns `Promise<void>`.
+
+### SecureStoreOptions
+
+```ts
+interface SecureStoreOptions {
+  keychainService?: string
+  requireAuthentication?: boolean
+  authenticationPrompt?: string
+  keychainAccessible?: KeychainAccessibilityConstant
+  accessGroup?: string
+}
+```
+
+### KeychainAccessibilityConstant
+
+`AFTER_FIRST_UNLOCK`, `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`, `ALWAYS`, `WHEN_PASSCODE_SET_THIS_DEVICE_ONLY`, `ALWAYS_THIS_DEVICE_ONLY`, `WHEN_UNLOCKED`, `WHEN_UNLOCKED_THIS_DEVICE_ONLY`.
+
+
+
+---
+url: /packages/platform/tamer-transports.md
+---
+
+# tamer-transports
+
+Fetch, WebSocket, and EventSource polyfills for Lynx. Required for HMR and WebSocket in native Lynx apps.
+
+## Overview
+
+Installs polyfills on import:
+
+- **installFetchPolyfill()** — Replaces Lynx’s stock fetch with a polyfill that attempts to meet the browser-standard fetch API
+- **installWebSocketPolyfill()** — WebSocket polyfill that attempts to meet the browser-standard WebSocket API
+- **installEventSourcePolyfill()** — EventSource polyfill that attempts to meet the browser-standard EventSource API
+
+Exports `fetch`, `WebSocket`, `EventSource` (native or polyfilled).
+
+**Background thread:** In Lynx, **`fetch`**, **`WebSocket`**, and **`EventSource`** are **background-thread** APIs (same as the host `fetch` in the [runtime docs](https://lynxjs.org/guide/scripting-runtime/index.md)). Do not call them from main-thread-only code. **Best practice:** perform network setup and any state updates from **`useEffect`**, event handlers, or other background-thread code, and add **`'background only'`** as the first statement in that function when the compiler cannot infer it (e.g. when setting React state after a fetch inside a custom hook).
+
+**Example (ReactLynx):** open a WebSocket in an effect, update state from messages, clean up on unmount:
+
+```tsx
+import { useEffect, useState } from '@lynx-js/react';
+import { WebSocket } from '@tamer4lynx/tamer-transports';
+
+export function App() {
+  const [text, setText] = useState('Hello');
+
+  useEffect(() => {
+    'background only';
+    let released = false;
+    const ws = new WebSocket('wss://example.com/socket');
+
+    ws.onmessage = (event) => {
+      if (released) return;
+      setText(String(event.data));
+    };
+    ws.onerror = (event) => {
+      console.error('ws error', event);
+    };
+
+    return () => {
+      released = true;
+      ws.onmessage = null;
+      ws.onerror = null;
+      try {
+        if (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN) {
+          ws.close(1000, 'cleanup');
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+  }, []);
+
+  return (
+    <view>
+      <text>{text}</text>
+    </view>
+  );
+}
+```
+
+> **Note:** These polyfills are not fully tested. Report issues on GitHub.
+
+## Installation
+
+```bash
+t4l add tamer-transports
+```
+
+Run **`t4l link`** after installing. Import early in your app entry (e.g. before any fetch/WebSocket usage):
+
+```ts
+import '@tamer4lynx/tamer-transports'
+```
+
+## API
+
+The package has no public API beyond the polyfills. Importing it installs the polyfills globally. Use `globalThis.fetch`, `new WebSocket(...)`, and `EventSource` as usual.
+
+
+
+---
+url: /packages/platform/tamer-webview.md
+---
+
+# tamer-webview
+
+Embedded in-app WebView for Lynx: **iOS** `WKWebView`, **Android** `android.webkit.WebView`. Registers the native custom element **`<webview>`** with props such as `uri`, `html`, and `baseUrl` (no JSON blob on the JS side). There is **no React wrapper component**—you use **`<webview>`** in JSX.
+
+Behavior and API are informed by [react-native-webview](https://github.com/react-native-webview/react-native-webview) (see `reference/react-native-webview` in this repo). Pages can post messages to the app using the same bridge name as RN: **`ReactNativeWebView`** (`window.ReactNativeWebView.postMessage(...)`).
+
+## Installation
+
+```bash
+t4l add tamer-webview
+```
+
+The CLI resolves npm’s default installable version for the package. Then run **`t4l link`** so native projects pick up `lynx.ext.json`, CocoaPods, and Gradle. **`t4l link`** also refreshes **`.tamer/tamer-components.d.ts`** and your **`tsconfig.json` `include`** when **`syncTamerComponentTypes`** is enabled (default in **`tamer.config.json`**).
+
+## Requirements
+
+- Native host must register the element (autolink does this for Tamer dev app and embeddable).
+- **ATS (iOS)** / **cleartext (Android)**: loading non-HTTPS URLs may require app-side configuration (`NSAppTransportSecurity`, `usesCleartextTraffic`, etc.).
+
+## TypeScript
+
+Ambient typings live in **`dist/webview-jsx.d.ts`** (declared in **`package.json`** `exports["./webview-jsx"]` and **`tamer.ambientTypeExports`**). They augment **`@lynx-js/types`** so **`<webview>`** is typed.
+
+**Typings:** **`t4l init`** / **`t4l link`** generate **`.tamer/tamer-components.d.ts`** with **`path`** references into **`node_modules/.../dist/webview-jsx.d.ts`** and update **`tsconfig.json` `include`** when **`syncTamerComponentTypes`** is enabled (default). You do **not** need `import '@tamer4lynx/tamer-webview'` for types alone—that file is enough. If the Lynx app uses **`src/tsconfig.json`**, include **`../.tamer/tamer-components.d.ts`** there as well—see [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md).
+
+Import the package only when you use JS exports (imperative helpers):
+
+```tsx
+import { useWebViewRef, callWebViewMethod } from '@tamer4lynx/tamer-webview'
+```
+
+## Usage
+
+```tsx
+<webview
+  uri="https://example.com"
+  injectedJavaScript="window.__tamer = 1;"
+  bindload={(e) => console.log(e.detail.url, e.detail.title)}
+  binderror={(e) => console.log(e.detail)}
+  bindmessage={(e) => console.log(e.detail.data)}
+/>
+```
+
+```tsx
+<webview html="<p>Hello</p>" baseUrl="https://example.org/" />
+```
+
+If **`uri`** is non-empty, it is loaded first. Otherwise **`html`** + optional **`baseUrl`** are used.
+
+## Props (`WebViewProps`)
+
+These match **`packages/tamer-webview/src/types.ts`** (ambient **`<webview>`** uses the same shape).
+
+| Prop                                    | Type                      | Description                                                               |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------- |
+| `uri`                                   | `string`                  | URL to load                                                               |
+| `html`                                  | `string`                  | Inline HTML string                                                        |
+| `baseUrl`                               | `string`                  | Base URL when loading `html`                                              |
+| `injectedJavaScript`                    | `string`                  | Script evaluated after load                                               |
+| `injectedJavaScriptBeforeContentLoaded` | `string`                  | Script evaluated before the page’s own scripts run                        |
+| `javaScriptEnabled`                     | `boolean`                 | Enable/disable JavaScript in the page                                     |
+| `messagingEnabled`                      | `boolean`                 | When enabled, exposes `window.ReactNativeWebView.postMessage` to the page |
+| `userAgent`                             | `string`                  | Override the WebView user agent                                           |
+| `style`                                 | `string \| CSSProperties` | Lynx styles                                                               |
+| `className`                             | `string`                  | CSS class name                                                            |
+| `id`                                    | `string`                  | Element id (e.g. for selector queries)                                    |
+| `bindload`                              | handler                   | See [Events](#events)                                                     |
+| `binderror`                             | handler                   | See [Events](#events)                                                     |
+| `bindmessage`                           | handler                   | See [Events](#events)                                                     |
+
+Native defaults (not encoded in TypeScript): **`javaScriptEnabled`** and **`messagingEnabled`** default to **`true`** on iOS/Android; **`userAgent`** falls back to a Chrome Mobile–style UA when unset.
+
+## Events
+
+Handlers use Lynx **`BaseEvent`**: **`e.detail`** carries the payload (not React-style).
+
+| Bind attribute | `e.detail` type                                                                               |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| `bindload`     | `{ url: string; title: string; loading: boolean; canGoBack: boolean; canGoForward: boolean }` |
+| `binderror`    | `{ domain?: string; code?: number; description?: string }`                                    |
+| `bindmessage`  | `{ data: string }` (from `window.ReactNativeWebView.postMessage`)                             |
+
+### Imperative APIs (`invoke` / `WebViewRef`) \{#imperative-apis}
+
+Use [`NodesRef.invoke`](https://lynxjs.org/api/lynx-api/nodes-ref/nodes-ref-invoke.html) with **`callWebViewMethod`**, or **`useWebViewRef()`** — the ref’s imperative surface is **`WebViewRef`** in **`packages/tamer-webview/src/index.tsx`**.
+
+| Method             | Params               | Description                                        |
+| ------------------ | -------------------- | -------------------------------------------------- |
+| `reload`           | —                    | Reload the current page                            |
+| `goBack`           | —                    | Go back in history                                 |
+| `goForward`        | —                    | Go forward in history                              |
+| `stopLoading`      | —                    | Stop the current load                              |
+| `loadUrl`          | `{ url: string }`    | Load a URL                                         |
+| `injectJavaScript` | `{ script: string }` | Run JS in the page                                 |
+| `postMessage`      | `{ data: string }`   | Dispatch a `message` event on `window` in the page |
+
+## See also
+
+- [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md) — `.tamer/tamer-components.d.ts` and `tsconfig` wiring
+- [Custom Element (Lynx)](https://lynxjs.org/guide/custom-native-component.html)
+- [NodesRef `invoke`](https://lynxjs.org/api/lynx-api/nodes-ref/nodes-ref-invoke.html)
+
+
+
+---
+url: /packages/tooling/index.md
+---
+
+# Tooling
+
+Developer experience and build-time integrations that are not runtime native modules in the same sense as platform packages.
+
+| Package                                                         | Role                                                                                      |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md) | `.tamer/tamer-components.d.ts` and `tsconfig` wiring from **`t4l init`** / **`t4l link`** |
+| [tamer-env](/packages/tooling/tamer-env.md)                     | Rspeedy plugin: `.env` files and compile-time env injection (`t4l add-core`)              |
+
+
+
+---
+url: /packages/tooling/tamer-ambient-types.md
+---
+
+# Ambient types for `@tamer4lynx` packages
+
+Native Tamer packages that add **custom elements** (JSX intrinsics) or **ambient** APIs should expose typings in a way the **t4l** CLI can discover and aggregate into **`.tamer/tamer-components.d.ts`** at the app root.
+
+## `package.json` contract
+
+1. **`exports`** — Declare a subpath whose `types` points at the emitted `.d.ts` (for example `./webview-jsx` → `./dist/webview-jsx.d.ts`).
+2. **`tamer.ambientTypeExports`** — Optional string array of those subpaths (same strings as in `exports`, e.g. `["./webview-jsx"]`). If omitted, **t4l** falls back to conventional export keys such as `./webview-jsx` and `./icon-jsx`.
+
+## Type modules
+
+Implement ambient tags in **`src/*-jsx.ts`** (not only `.d.ts`): `declare module '@lynx-js/types' { interface IntrinsicElements { … } }` merged into the existing interface, plus **`/// <reference types="@lynx-js/types" />`**. **`.ts`** is required so **`import './icon-jsx'`** resolves when apps bundle source (e.g. Rspeedy aliases to `packages/tamer-icons/src`). **`tsc`** emits **`dist/*-jsx.js`** (usually `export {}`) and **`dist/*-jsx.d.ts`**; the post-build script adjusts **`dist/index.d.ts`** to **`/// <reference path="./…-jsx.d.ts" />`** for consumers. **t4l**’s `.tamer/tamer-components.d.ts` uses **triple-slash `path`** references into **`node_modules/.../dist/*-jsx.d.ts`** ( **`types=`** subpaths are unreliable for augmentations in some setups).
+
+## CLI behavior
+
+When **`syncTamerComponentTypes`** in `tamer.config.json` is not `false` (default: on), **`t4l init`** and **`t4l link`** regenerate `.tamer/tamer-components.d.ts` and ensure **`tsconfig.json`** includes it (and remove broad `node_modules/@tamer4lynx/tamer-*/**/*.d.ts` globs).
+
+
+
+---
+url: /packages/tooling/tamer-env.md
+---
+
+# @tamer4lynx/tamer-env
+
+**Rspeedy / Rsbuild plugin** for loading `.env` files during `rspeedy build` and `rspeedy dev`, and injecting values into the Lynx bundle.
+
+## Why
+
+The `t4l bundle` / native pipeline does not run `lynx.config.ts` with your shell environment the same way as local `npm run build`. Using **`pluginTamerEnv`** keeps env handling in one place and bakes public values into the bundle at compile time (same idea as explicit `source.define`, but driven by `.env` files).
+
+## Install
+
+Included in **`t4l add-core`**, or:
+
+```bash
+t4l add tamer-env
+```
+
+The package ships **`./tamer.config`**: when you use **`pluginTamer()`** in `lynx.config.ts`, **tamer-plugin** discovers `@tamer4lynx/tamer-env` in `node_modules` and merges **`pluginTamerEnv({})`** (defaults).
+
+To **override** options (or avoid registering the plugin twice), pass **`tamerEnv`** into **`pluginTamer`** — your instance wins over the package default:
+
+```ts
+pluginTamer({
+  tamerEnv: pluginTamerEnv({ root: __dirname, publicPrefix: 'TAMER_PUBLIC_' }),
+})
+```
+
+To **disable** the bundled env plugin (e.g. you only use `source.define` by hand): **`pluginTamer({ tamerEnv: false })`**.
+
+## Usage
+
+Minimal (defaults from the package only):
+
+```ts
+import { pluginTamer } from '@tamer4lynx/tamer-plugin'
+
+export default {
+  plugins: [pluginTamer()],
+}
+```
+
+With custom options (recommended when you need `defineFromEnv` or non-default `root`):
+
+```ts
+import { pluginTamer } from '@tamer4lynx/tamer-plugin'
+import { pluginTamerEnv } from '@tamer4lynx/tamer-env'
+
+export default {
+  plugins: [
+    pluginTamer({
+      tamerEnv: pluginTamerEnv({
+        root: __dirname,
+      }),
+    }),
+  ],
+}
+```
+
+### `process.env` (prefixed)
+
+By default, only variables whose names start with **`TAMER_PUBLIC_`** are exposed as `process.env.TAMER_PUBLIC_*` in the bundle. Override the prefix with `publicPrefix`, or list extra keys with `include`.
+
+### `__FOO__` compile-time globals
+
+If your code uses injected globals (e.g. `__OAUTH_CLIENT_ID__`) instead of `process.env`, use **`defineFromEnv`** to map each global to an env var name, and optional **`envDefaults`** for fallbacks when a key is missing:
+
+```ts
+pluginTamerEnv({
+  root: __dirname,
+  defineFromEnv: {
+    __OAUTH_CLIENT_ID__: 'OAUTH_CLIENT_ID',
+  },
+  envDefaults: {
+    OAUTH_REDIRECT_URI: 'myapp://callback',
+  },
+})
+```
+
+Values in `source.define` in `lynx.config` still override the plugin for the same keys (merge order: plugin first, then your config).
+
+### Files loaded
+
+In order (later overrides earlier), when **`skipDotenv`** is not set:
+
+1. `.env`
+2. `.env.local`
+3. `.env.development` or `.env.production` (from `NODE_ENV`)
+4. `.env.<mode>.local`
+
+Then **`process.env`** wins over file values for any key set in the environment (CI, shell).
+
+## See also
+
+- [Configuration](/guide/configuration.md) — `paths.lynxAdditionalBundles` for multiple bundles with `t4l start` / `t4l bundle`
+- [tamer-plugin](/packages/core/tamer-plugin.md) — load `tamer.config` into Rsbuild
+
+
+
+---
+url: /packages/ui/index.md
+---
+
+# UI packages
+
+Layout, safe area, system chrome, and icon typography for Lynx screens.
+
+| Package                                            | Role                                  |
+| -------------------------------------------------- | ------------------------------------- |
+| [tamer-screen](/packages/ui/tamer-screen.md)       | `Screen`, `SafeArea`, `AvoidKeyboard` |
+| [tamer-insets](/packages/ui/tamer-insets.md)       | Safe area and keyboard insets         |
+| [tamer-system-ui](/packages/ui/tamer-system-ui.md) | Status bar, navigation bar, theme     |
+| [tamer-icons](/packages/ui/tamer-icons.md)         | Native `<icon>` and font assets       |
+
+These are included in **`t4l add-core`** (except optional combinations—see [Packages overview](/packages/index.md)).
+
+
+
+---
+url: /packages/ui/tamer-icons.md
+---
+
+# tamer-icons
+
+Typings and font assets for the native Lynx **`<icon>`** element (Material Icons, Material Symbols, Font Awesome solid + brands). There is **no `Icon` React component** — you use **`<icon>`** with the native attribute names below.
+
+## Install
+
+```bash
+t4l add tamer-icons
+# or: t4l add-core   # includes tamer-icons
+```
+
+Run **`t4l link`** after installing.
+
+Peer: **`@lynx-js/types`** (for `IntrinsicElements` typings).
+
+## Usage
+
+```tsx
+import '@tamer4lynx/tamer-icons'
+
+<icon
+  icon="home"
+  set="material"
+  size={24}
+  iconColor="#333"
+  style={{ width: '24px', height: '24px' }}
+/>
+```
+
+### Examples
+
+```tsx
+{/* Material classic */}
+<icon icon="home" set="material" size={24} iconColor="#333" />
+
+{/* Material Symbols, filled variant */}
+<icon icon="favorite" set="material_symbols" fill={1} size={24} iconColor="#e53935" />
+
+{/* Font Awesome solid */}
+<icon icon="envelope" set="fa" size={20} iconColor="#666" />
+
+{/* Font Awesome brands — github, discord, twitter, x-twitter, youtube,
+    linkedin, npm, apple, android, google ship as built-in codepoints */}
+<icon icon="github"  set="fab" size={20} iconColor="#000" />
+<icon icon="discord" set="fab" size={20} iconColor="#5865f2" />
+```
+
+## Props
+
+| Attribute            | Description                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `icon`               | Icon name / codepoint key                                                                              |
+| `set`                | `'material'` \| `'material_symbols'` \| `'fontawesome'` \| `'fa'` \| `'fontawesome_brands'` \| `'fab'` |
+| `size`               | Number (often paired with `style` width/height)                                                        |
+| `iconColor`          | Color string                                                                                           |
+| `fill`               | `0` (outline) or `1` (filled). Material Symbols only.                                                  |
+| `style`              | `ViewProps['style']` (Lynx view style)                                                                 |
+| `className`, `id`, … | From **`ViewProps`** — same as other Lynx views                                                        |
+
+## Exports
+
+| Export                          | Description                          |
+| ------------------------------- | ------------------------------------ |
+| `IconElementProps`              | Props type for `<icon>`              |
+| `IconSet`                       | All set names (see Props row above)  |
+| `MATERIAL_ICONS_URL`            | Material Symbols (variable) font URL |
+| `MATERIAL_ICONS_CLASSIC_URL`    | Material Icons (classic) font URL    |
+| `FONTAWESOME_SOLID_URL`         | Font Awesome solid font URL          |
+| `FONTAWESOME_BRANDS_URL`        | Font Awesome brands font URL         |
+| `MATERIAL_CODEPOINTS`           | Material icon codepoint map          |
+| `FONTAWESOME_BRANDS_CODEPOINTS` | Font Awesome brands codepoint map    |
+
+***
+
+## How it works
+
+### The `<icon>` element
+
+`IconElementProps` (in `packages/tamer-icons/src/icon-jsx.ts`) extends **`ViewProps`** from `@lynx-js/types`, so the element accepts every standard view prop (`className`, `id`, `style`, …) on top of the icon-specific ones above. Native renderers live in the iOS pod (`TamerIconElement.m`) and the Android module (`IconElement.kt`).
+
+### Fonts
+
+Four font files ship inside the package:
+
+| Font                        | Used for `set=`              | iOS bundle path                                    | Android assets path                        |
+| --------------------------- | ---------------------------- | -------------------------------------------------- | ------------------------------------------ |
+| Material Icons (classic)    | `material`                   | `tamericons/Resources/MaterialIcons-Regular.ttf`   | `assets/fonts/MaterialIcons-Regular.ttf`   |
+| Material Symbols (variable) | `material_symbols`           | `tamericons/Resources/MaterialSymbolsOutlined.ttf` | `assets/fonts/MaterialSymbolsOutlined.ttf` |
+| Font Awesome solid          | `fontawesome` / `fa`         | `tamericons/Resources/fa-solid-900.ttf`            | `assets/fonts/fa-solid-900.ttf`            |
+| Font Awesome brands         | `fontawesome_brands` / `fab` | `tamericons/Resources/fa-brands-400.ttf`           | `assets/fonts/fa-brands-400.ttf`           |
+
+For non-native targets (web preview), the URLs above export the same fonts so you can register them via `lynx.addFont` / `@font-face`.
+
+### iOS (CocoaPods)
+
+The pod bundles `.ttf` files under `tamericons/Resources/`. They are produced by the package's `npm run build` (`fetch-fonts` → `copy-ios-fonts`). After `npm install` / `pnpm install`, `prepare` runs that build; if you use `--ignore-scripts`, run `npm run build` inside `@tamer4lynx/tamer-icons` before `pod install`, or the resource bundle may fail to compile.
+
+### TypeScript
+
+Ambient typings ship as `dist/icon-jsx.d.ts` (`exports["./icon-jsx"]`, `tamer.ambientTypeExports`). They augment `@lynx-js/types` for `<icon>`.
+
+**Recommended:** use `t4l init` / `t4l link` so `.tamer/tamer-components.d.ts` includes `path` references into `node_modules/.../dist/icon-jsx.d.ts`, and list the generated file in `tsconfig.json`. If you use `src/tsconfig.json`, include `../.tamer/tamer-components.d.ts` there too — see [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md). `t4l link` also refreshes `.tamer/tamer-components.d.ts` and the `tsconfig.json` `include` array when `syncTamerComponentTypes` is enabled (default in `tamer.config.json`).
+
+**Optional:** side-effect import so typings load without relying only on the generated file:
+
+```tsx
+import '@tamer4lynx/tamer-icons'
+```
+
+## See also
+
+- [Ambient types (CLI)](/packages/tooling/tamer-ambient-types.md)
+
+
+
+---
+url: /packages/ui/tamer-insets.md
+---
+
+# tamer-insets
+
+Safe area insets and keyboard state for Lynx. Requires `TamerInsetsModule` native module.
+
+## Overview
+
+- **useInsets()** — Returns `{ top, right, bottom, left, raw }` (safe area insets in px)
+- **useKeyboard()** — Returns `{ visible, height, duration, raw }` (keyboard state; `duration` is animation ms for transitions)
+
+Listens to `tamer-insets:change` and `tamer-insets:keyboard` (Android) and `keyboardstatuschanged` (iOS). Falls back to `TamerInsetsModule.getInsets` / `getKeyboard` on mount.
+
+## Installation
+
+```bash
+t4l add tamer-insets
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### useInsets()
+
+Returns `InsetsWithRaw`:
+
+```ts
+interface InsetsWithRaw extends Insets {
+  top: number
+  right: number
+  bottom: number
+  left: number
+  raw: Insets
+}
+```
+
+### useKeyboard()
+
+Returns `KeyboardStateWithRaw`:
+
+```ts
+interface KeyboardStateWithRaw extends KeyboardState {
+  visible: boolean
+  height: number
+  duration: number
+  raw: KeyboardState
+}
+```
+
+## Platform notes
+
+### iOS (v0.0.4+)
+
+Call **`TamerInsetsModule.attachHostView(lynxView)`** after adding your LynxView to the hierarchy so safe-area and keyboard overlap match the Lynx surface. Call **`attachHostView(nil)`** before tearing down. Templates in tamer-host / tamer-dev-client do this automatically.
+
+The keyboard visibility threshold was relaxed from `> 0.5pt` to `> 0pt` in v0.0.4, fixing detection on iOS 26.2 where keyboard height above safe area is minimal.
+
+### Android
+
+After keyboard height updates, the module reschedules a few delayed inset re-reads to handle custom ROMs that report IME size incorrectly on first frames.
+
+
+
+---
+url: /packages/ui/tamer-screen.md
+---
+
+# tamer-screen
+
+Screen, SafeArea, and AvoidKeyboard components. Re-exports `useInsets` and `useKeyboard` from tamer-insets.
+
+## Overview
+
+- **Screen** — Full-screen flex column container
+- **SafeArea** — Applies safe area insets as padding; provides `SafeAreaContext`
+- **AvoidKeyboard** — Adjusts layout when keyboard is visible
+- **useSafeAreaContext()** — Returns `{ hasTop, hasRight, hasBottom, hasLeft }` when inside SafeArea
+
+## Installation
+
+```bash
+t4l add tamer-screen tamer-insets
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### Screen
+
+```tsx
+<Screen style?>{children}</Screen>
+```
+
+Flex column, full width/height, minHeight 0.
+
+### SafeArea
+
+```tsx
+<SafeArea edges?: ('top'|'right'|'bottom'|'left')[] style?>{children}</SafeArea>
+```
+
+Applies `useInsets()` as padding on specified edges. Default `edges` is all four. Provides `SafeAreaContext` to children.
+
+### AvoidKeyboard
+
+```tsx
+<AvoidKeyboard behavior?: 'padding'|'position' animate?: boolean style?>{children}</AvoidKeyboard>
+```
+
+When keyboard is visible, adds bottom padding (`padding`) or `bottom` offset (`position`). **Requires `<Screen>` as an ancestor** — the default `behavior='position'` uses `position: relative` + `bottom` offset, which has no reference frame without the full-height screen container.
+
+With `SafeArea` bottom edge, applies a negative margin while the keyboard is open. `animate` animates `padding-bottom` or `bottom`; `animate={false}` snaps without transition.
+
+### useSafeAreaContext()
+
+Returns `{ hasTop, hasRight, hasBottom, hasLeft } | null`. Non-null when inside a SafeArea with that edge enabled.
+
+
+
+---
+url: /packages/ui/tamer-system-ui.md
+---
+
+# tamer-system-ui
+
+Status bar, navigation bar, and theme colors for Lynx. Requires `SystemUIModule` native module.
+
+## Overview
+
+- **setStatusBar** — Set status bar style (light/dark/auto)
+- **setNavigationBar** — Set nav bar color and style
+- **setRootBackground** — Set root view background
+- **getThemeColors** / **getThemeColorsAsync** — Get system theme colors
+- **useThemeColors()** — Reactive hook for theme colors; listens to `system-ui:themeChanged`
+
+## Installation
+
+```bash
+t4l add tamer-system-ui
+```
+
+Run **`t4l link`** after installing.
+
+## API
+
+### useSystemUI()
+
+Returns `{ setStatusBar, setNavigationBar, setRootBackground, getThemeColors, getThemeColorsAsync }`.
+
+### setStatusBar(options)
+
+```ts
+interface StatusBarOptions {
+  color?: string   // Background color (for 'auto' style)
+  style?: 'light' | 'dark' | 'auto'
+}
+```
+
+When `style` is `'auto'`, derives light/dark from `color` using WCAG luminance.
+
+### setNavigationBar(options)
+
+```ts
+interface NavigationBarOptions {
+  color: string
+  style?: 'light' | 'dark' | 'auto'
+}
+```
+
+### setRootBackground(options)
+
+```ts
+{ color: string }
+```
+
+### ThemeColors
+
+```ts
+interface ThemeColors {
+  primary?: string
+  primaryDark?: string
+  background?: string
+  surface?: string
+  surfaceContainer?: string
+  onSurface?: string
+  isDark?: boolean
+}
+```
+
+### useThemeColors()
+
+Returns `ThemeColors | null`. Updates on `system-ui:themeChanged` or refetch.
+
+
+
+---
+url: /index.md
+---
+
+# Tamer4Lynx
+
+Native routing, UI, and platform APIs for Lynx apps
+
+> <p><strong>Tamer</strong> extends <a href="https://lynxjs.org/" target="_blank" rel="noopener">Lynx</a> with routing, shell UI, and native modules—auth, storage, transports, and more—for <strong>iOS, Android, and web</strong>. <strong>HarmonyOS</strong> support is coming soon. You keep building with Lynx and Rspeedy; <strong>Tamer</strong> handles native hosts, modules, and builds.</p>
+<p><strong>Debug</strong> and <strong>production</strong> builds take a few commands, <strong>native modules</strong> included—you skip the repetitive Xcode and Gradle setup.</p>
+
+
+[Getting Started](/guide/getting-started/) | [Configuration](/guide/configuration) | [Commands](/reference/commands) | [GitHub](https://github.com/tamer4lynx/tamer4lynx)
+
+## Features
+
+- 🧭 **File-based routing**: tamer-router provides Stack and Tabs layouts with AppBar/TabBar, Rsbuild route generation, and system back integration (`tamer-router:back`, `useBackHandler` / `usePreventBack`, native `didHandleBack`).
+- 🔧 **Dev client**: tamer-dev-client offers QR scan, discovery, URL persistence, recent-server reachability dots, and a reload bridge for the dev launcher experience.
+- 🎨 **UI components**: tamer-app-shell, tamer-icons, tamer-insets, and tamer-system-ui for native UI building blocks. Text inputs use Lynx built-in `<input>` and `<textarea>`.
+- 📦 **Platform APIs**: tamer-transports, tamer-screen, tamer-auth, tamer-secure-store, tamer-biometric, tamer-linking, tamer-display-browser, and tamer-webview.
+- 🔗 **Lynx Autolink RFC**: Aligned with the <a href="https://github.com/lynx-family/lynx/discussions/2653" target="_blank" rel="noopener">Lynx Autolink RFC</a>. Uses lynx.ext.json for extension discovery and linking.
+- 🌍 **Cross-platform**: Targets iOS, Android, and web from a single codebase with <a href="https://lynxjs.org/react/" target="_blank" rel="noopener">ReactLynx</a> and <a href="https://lynxjs.org/rspeedy/" target="_blank" rel="noopener">Rspeedy</a>. HarmonyOS support coming soon.
+- ⚡ **Framework agnostic**: Tamer4Lynx is conceptually Lynx framework agnostic and should work with <a href="https://github.com/haskell-miso/miso-lynx" target="_blank" rel="noopener">miso-lynx</a>, <a href="https://github.com/rahul-vashishtha/lynx-stack/tree/lynx-vue-implementation/packages/vue" target="_blank" rel="noopener">VueLynx</a> (@lynx-js/vue), or other Lynx bindings. Some modules like tamer-router are specifically designed for @lynx-js/react.
+
+
